@@ -20,7 +20,7 @@ BlogPost extend [
         text linesDo:
             [:each | each ifNotNil: [html paragraph
                                         class: 'post-text';
-                                        with: each]].
+                                        with: each]]
     ]
 
     renderTagsOn: html [
@@ -30,6 +30,23 @@ BlogPost extend [
             with: [html text: tags printString].
     ]
 
+    renderActionsOn: html [
+        <category: 'rendering-private'>
+        html div
+            class: 'post-actions';
+            with:
+                [html anchor
+                     callback: [];
+                     with: [html text: 'Add a comment'].
+                 html anchor
+                     callback: [(CommandHub command: #edit) value: self];
+                     with: [html text: 'Edit'].
+                 html anchor
+                     callback: [(CommandHub command: #remove) value: self];
+                     with: [html text: 'Remove']]
+    ]
+
+
     renderContentOn: html [
         <category: 'rendering'>
         html div
@@ -37,7 +54,8 @@ BlogPost extend [
             with: [self renderTitleOn: html.
                    self renderTimeStampOn: html.
                    self renderTextOn: html.
-                   self renderTagsOn: html]
+                   self renderTagsOn: html].
+        self renderActionsOn: html.
     ]
 ]
 
@@ -89,7 +107,6 @@ Seaside.WAComponent subclass: BlogPostComponent [
         post := aPost.
     ]
     
-
     renderContentOn: html [
         html anchor
             callback: (CommandHub command: #home);
@@ -99,33 +116,52 @@ Seaside.WAComponent subclass: BlogPostComponent [
 ]
 
 Seaside.WAComponent subclass: BlogTape [
-    renderActionsOn: html for: aPost [
+    renderActionsOn: html [
         <category: 'rendering-private'>
-        html div
-            class: 'post-actions';
-            with:
-                [html anchor
-                     callback: [(CommandHub command: #edit) value: aPost];
-                     with: [html text: 'Edit'].
-                 html anchor
-                     callback: [(CommandHub command: #remove) value: aPost];
-                     with: [html text: 'Remove'].
-                 html anchor
-                     callback: [];
-                     with: [html text: 'Add a comment']]
-    ]
-
-    renderContentOn: html [
+        "TODO: a Decorator?"
         html anchor
             callback: (CommandHub command: #compose);
             with: [html text: 'Add a post'].
+    ]
+
+    renderContentOn: html [
+        <category: 'rendering'>
+        self renderActionsOn: html.
         html div
             class: 'tape';
-            with:
-                [Storage posts do:
-                    [:each |
-                        each renderContentOn: html.
-                        self renderActionsOn: html for: each]]
+            with: [self items do: [:each | each renderContentOn: html]]
+    ]
+
+    items [
+        <category: 'private'>
+        ^Storage posts
+    ]
+]
+
+BlogTape subclass: FilteredBlogTape [
+    | filterBlock |
+    FilteredBlogTape class >> using: aFilterBlock [
+        <category: 'instance creation'>
+        ^self new filterBlock: aFilterBlock
+    ]
+
+    renderActionsOn: html [
+        <category: 'rendering-private'>
+        "TODO: a Decorator?"
+        "TODO: Reusable 'Back to posts' component"
+        html anchor
+            callback: (CommandHub command: #home);
+            with: [html text: 'Back to posts'].
+    ]
+
+    filterBlock: aFilterBlock [
+        <category: 'private'>
+        filterBlock := aFilterBlock
+    ]
+
+    items [
+        <category: 'private'>
+        ^super items select: filterBlock
     ]
 ]
 
@@ -153,7 +189,13 @@ Seaside.WAComponent subclass: BlogCloud [
         html div 
             class: 'cloud';
             with: [Cloud tags keysAndValuesDo: [:eachKey :eachValue |
-                html text: (eachKey, ' (', (eachValue asString), ')'); break]]
+                html anchor
+                    callback: [(CommandHub command: #viewTag) value: eachKey];
+                    with: [html text: eachKey].
+                html
+                    space;
+                    text: ('(', (eachValue asString), ')');
+                    break]]
     ]
 ]
 
@@ -175,7 +217,8 @@ Seaside.WAComponent subclass: BlogApplication [
             addCommand: #remove  block: [:aPost | self remove: aPost];
             addCommand: #view    block: [:aPost | self view: aPost];
             addCommand: #edit    block: [:aPost | self edit: aPost];
-            addCommand: #home    block: [self goHome].
+            addCommand: #home    block: [self goHome];
+            addCommand: #viewTag block: [:aTag | self viewTag: aTag].
         tape := BlogTape new.
         header := BlogHeader new.
         footer := BlogFooter new.
@@ -186,18 +229,23 @@ Seaside.WAComponent subclass: BlogApplication [
         <category: 'functionality'>
         | aPost |
         aPost := tape call: (BlogPost new asComponent addValidatedForm).
-        aPost ifNotNil: [Storage posts add: aPost]
+        aPost ifNotNil: [Storage add: aPost]
     ]
 
     remove: aPost [
         <category: 'functionality'>
         (tape confirm: ('Are you sure you want to delete post "', aPost title, '"?'))
-            ifTrue: [Storage posts remove: aPost]
+            ifTrue: [Storage remove: aPost]
     ]
 
     view: aPost [
         <category: 'functionality'>
         tape show: (BlogPostComponent for: aPost)
+    ]
+
+    viewTag: aTagString [
+        <category: 'functionality'>
+        tape show: (FilteredBlogTape using: [:aPost | aPost tagged includes: aTagString])
     ]
 
     edit: aPost [
@@ -212,12 +260,12 @@ Seaside.WAComponent subclass: BlogApplication [
 
     states [
         <category: 'seaside'>
-        ^Array with: tape
+        ^Array with: tape with: cloud
     ]
 
     children [
         <category: 'seaside'>
-        ^Array with: tape
+        ^Array with: tape with: cloud
     ]
 
     renderContentOn: html [

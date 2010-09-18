@@ -71,6 +71,16 @@ Object subclass: Storage [
         <category: 'accessing'>
         ^posts
     ]
+
+    Storage class >> add: aPost [
+        <category: 'accessing'>
+        posts addFirst: aPost
+    ]
+
+    Storage class >> remove: aPost [
+        <category: 'accessing'>
+        posts remove: aPost
+    ]
 ]
 
 Object subclass: CommandHub [

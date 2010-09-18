@@ -1,18 +1,11 @@
 Object subclass: BlogPost [
     | text title timestamp tags comments |
 
-    BlogPost class >> title: aTitle text: aString tagged: aCollection [
-        <category: 'instance creation'>
-        ^(self basicNew)
-            title: aTitle text: aString tagged: aCollection;
-            yourself
+    BlogPost class >> new [
+        ^ self basicNew initialize
     ]
 
-    title: aTitle text: aString tagged: aCollection [
-        <category: 'private'>
-        text := aString.
-        tags := aCollection.
-        title := aTitle. 
+    initialize [
         timestamp := DateTime now.
         comments := OrderedCollection new.
     ]
@@ -25,6 +18,11 @@ Object subclass: BlogPost [
     remove: aComment [
         <category: 'comments'>
         comments remove: aComment
+    ]
+
+    tagged [
+        <category: 'accessing'>
+        ^tags
     ]
 ]
 
@@ -63,5 +61,42 @@ BlogComment subclass: GuestComment [
         name := aName.
         email := aMail.
         www := aWebsite.
+    ]
+]
+
+Object subclass: Storage [
+    posts := OrderedCollection new.
+
+    Storage class >> posts [
+        <category: 'accessing'>
+        ^posts
+    ]
+]
+
+Object subclass: CommandHub [
+    commands := Dictionary new.
+
+    CommandHub class >> addCommand: aNameSymbol block: aBlock [
+        <category: 'functionality'>
+        ^commands at: aNameSymbol put: aBlock
+    ]
+
+    CommandHub class >> command: aNameSymbol [
+        ^commands at: aNameSymbol
+    ]
+]
+
+Object subclass: Cloud [
+    Cloud class >> tags [
+        <category: 'accessing'>
+        | tags |
+        tags := Dictionary new.
+        Storage posts do:
+            [:eachPost |
+                eachPost tagged do:
+                    [:eachTag || count |
+                        count := tags at: eachTag ifAbsentPut: [0].
+                        tags at: eachTag put: (count + 1)]].
+        ^tags
     ]
 ]

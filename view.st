@@ -27,7 +27,25 @@ BlogPost extend [
         <category: 'rendering-private'>
         html div
             class: 'post-tags';
-            with: [html text: tags printString].
+            with:
+                [| firstTag otherTags |
+                firstTag := tags first.
+                otherTags := tags allButFirst.
+                
+                html text: 'Tagged:'; space.
+
+                "TODO: a Reusable tag component"
+
+                html anchor
+                    callback: [(CommandHub command: #viewTag) value: firstTag];
+                    with: [html text: firstTag].
+
+                otherTags do:
+                    [:each |
+                    html text: ','; space.
+                    html anchor
+                        callback: [(CommandHub command: #viewTag) value: firstTag];
+                        with: [html text: each]]]
     ]
 
     renderActionsOn: html [
@@ -192,10 +210,7 @@ Seaside.WAComponent subclass: BlogCloud [
                 html anchor
                     callback: [(CommandHub command: #viewTag) value: eachKey];
                     with: [html text: eachKey].
-                html
-                    space;
-                    text: ('(', (eachValue asString), ')');
-                    break]]
+                html space; text: ('(', (eachValue asString), ')'); break]]
     ]
 ]
 

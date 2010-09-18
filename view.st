@@ -12,15 +12,25 @@ BlogPost extend [
         <category: 'rendering-private'>
         html div
             class: 'post-timestamp';
-            with: [html text: timestamp printString]        
+            with: [html text: 'Posted on'; space.
+                   html anchor
+                       callback: [(CommandHub command: #viewDate) value: self dated];
+                       with: [html text: self dated printString].
+                   html
+                       space;
+                       text: 'at'; space;
+                       text: timestamp asTime printString]        
     ]
 
     renderTextOn: html [
         <category: 'rendering-private'>
-        text linesDo:
-            [:each | each ifNotNil: [html paragraph
+        html div
+            class: 'post-content';
+            with: 
+                [text linesDo:
+                    [:each | each ifNotNil: [html paragraph
                                         class: 'post-text';
-                                        with: each]]
+                                        with: each]]]
     ]
 
     renderTagsOn: html [
@@ -35,7 +45,6 @@ BlogPost extend [
                 html text: 'Tagged:'; space.
 
                 "TODO: a Reusable tag component"
-
                 html anchor
                     callback: [(CommandHub command: #viewTag) value: firstTag];
                     with: [html text: firstTag].
@@ -55,15 +64,17 @@ BlogPost extend [
             with:
                 [html anchor
                      callback: [];
+                     class: 'post-action';
                      with: [html text: 'Add a comment'].
                  html anchor
                      callback: [(CommandHub command: #edit) value: self];
+                     class: 'post-action';
                      with: [html text: 'Edit'].
                  html anchor
                      callback: [(CommandHub command: #remove) value: self];
-                     with: [html text: 'Remove']]
+                     class: 'post-action';
+                     with: [html text: 'Remove']].
     ]
-
 
     renderContentOn: html [
         <category: 'rendering'>
@@ -72,8 +83,8 @@ BlogPost extend [
             with: [self renderTitleOn: html.
                    self renderTimeStampOn: html.
                    self renderTextOn: html.
-                   self renderTagsOn: html].
-        self renderActionsOn: html.
+                   self renderTagsOn: html.
+                   self renderActionsOn: html]
     ]
 ]
 
@@ -228,12 +239,13 @@ Seaside.WAComponent subclass: BlogApplication [
 
         "We need to set up a command hub at first"
         CommandHub
-            addCommand: #compose block: [self compose];
-            addCommand: #remove  block: [:aPost | self remove: aPost];
-            addCommand: #view    block: [:aPost | self view: aPost];
-            addCommand: #edit    block: [:aPost | self edit: aPost];
-            addCommand: #home    block: [self goHome];
-            addCommand: #viewTag block: [:aTag | self viewTag: aTag].
+            addCommand: #compose  block: [self compose];
+            addCommand: #remove   block: [:aPost | self remove: aPost];
+            addCommand: #view     block: [:aPost | self view: aPost];
+            addCommand: #edit     block: [:aPost | self edit: aPost];
+            addCommand: #home     block: [self goHome];
+            addCommand: #viewTag  block: [:aTag | self viewTag: aTag];
+            addCommand: #viewDate block: [:aDate | self viewDate: aDate].
         tape := BlogTape new.
         header := BlogHeader new.
         footer := BlogFooter new.
@@ -261,6 +273,11 @@ Seaside.WAComponent subclass: BlogApplication [
     viewTag: aTagString [
         <category: 'functionality'>
         tape show: (FilteredBlogTape using: [:aPost | aPost tagged includes: aTagString])
+    ]
+
+    viewDate: aDate [
+        <category: 'functionality'>
+        tape show: (FilteredBlogTape using: [:aPost | aPost dated = aDate])
     ]
 
     edit: aPost [

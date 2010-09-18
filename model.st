@@ -24,6 +24,11 @@ Object subclass: BlogPost [
         <category: 'accessing'>
         ^tags
     ]
+
+    dated [
+        <category: 'accessing'>
+        ^timestamp asDate
+    ]
 ]
 
 Object subclass: BlogComment [

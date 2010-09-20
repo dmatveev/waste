@@ -40,6 +40,7 @@ Object subclass: CommandHub [
     ]
 
     CommandHub class >> command: aNameSymbol [
+        <category: 'functionality'>
         ^commands at: aNameSymbol
     ]
 ]

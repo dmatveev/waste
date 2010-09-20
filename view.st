@@ -295,3 +295,4 @@ Seaside.WAComponent subclass: BlogApplication [
                     with: [html render: footer]]]
     ]
 ]
+

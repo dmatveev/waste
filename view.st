@@ -1,3 +1,15 @@
+"-------------------------------------------------------------------------------
+    Yes. Domain object knows how to render it on html. Looks ugly? But now
+    BlogPost is almost the only class that deals with the post's inner
+    representation.
+
+    I could introduce an additional BlogPostRenderer to generate html from
+    domain objects, but it requires a set of accessor methods in the BlogPost.
+
+    I do not like accessors (but a BlogPost _has_ it, see 'descriptors.st' -
+    they are used only for Magritte).
+ ------------------------------------------------------------------------------"
+
 BlogPost extend [
     renderTitleOn: html [
         <category: 'rendering-private'>
@@ -44,7 +56,7 @@ BlogPost extend [
                 
                 html text: 'Tagged:'; space.
 
-                "TODO: a Reusable tag component"
+                "TODO: introduce a Reusable tag component"
                 html anchor
                     callback: [(CommandHub command: #viewTag) value: firstTag];
                     with: [html text: firstTag].
@@ -53,7 +65,7 @@ BlogPost extend [
                     [:each |
                     html text: ','; space.
                     html anchor
-                        callback: [(CommandHub command: #viewTag) value: firstTag];
+                        callback: [(CommandHub command: #viewTag) value: each];
                         with: [html text: each]]]
     ]
 
@@ -88,43 +100,8 @@ BlogPost extend [
     ]
 ]
 
-Seaside.WASession subclass: BlogSession [
-    | account |
-
-    account [
-        <category: 'accessing'>
-        ^account
-    ]
-
-    account: anAccount [
-        <category: 'accessing'>
-        account := anAccount
-    ]
-]
-
-Seaside.WAComponent subclass: BlogCommentPoster [
-    | post |
-
-    BlogCommentPoster class >> for: aPost [
-        <category: 'instance creation'>
-        ^self new for: aPost
-    ]
-
-    for: aPost [
-        <category: 'private'>
-        | commentClass aNewComment |
-        commentClass := self session account
-                                ifNil: [GuestComment]
-                                ifNotNil: [AuthorComment].
-        [true] whileTrue:
-            [aNewComment := self call: commentClass new asComponent addValidatedForm.
-             aNewComment ifNotNil: (post comment: aNewComment)]
-        
-    ]
-]
-
 Seaside.WAComponent subclass: BlogPostComponent [
-    | post newCommentComponent |
+    | post |
 
     BlogPostComponent class >> for: aPost [
         <category: 'instance creation'>
@@ -147,7 +124,7 @@ Seaside.WAComponent subclass: BlogPostComponent [
 Seaside.WAComponent subclass: BlogTape [
     renderActionsOn: html [
         <category: 'rendering-private'>
-        "TODO: a Decorator?"
+        "TODO: introduce a Decorator?"
         html anchor
             callback: (CommandHub command: #compose);
             with: [html text: 'Add a post'].
@@ -176,7 +153,7 @@ BlogTape subclass: FilteredBlogTape [
 
     renderActionsOn: html [
         <category: 'rendering-private'>
-        "TODO: a Decorator?"
+        "TODO: introduce a Decorator?"
         "TODO: Reusable 'Back to posts' component"
         html anchor
             callback: (CommandHub command: #home);
@@ -237,14 +214,13 @@ Seaside.WAComponent subclass: BlogApplication [
         <category: 'initialization'>
         super initialize.
 
-        "We need to set up a command hub at first"
         CommandHub
             addCommand: #compose  block: [self compose];
             addCommand: #remove   block: [:aPost | self remove: aPost];
             addCommand: #view     block: [:aPost | self view: aPost];
             addCommand: #edit     block: [:aPost | self edit: aPost];
             addCommand: #home     block: [self goHome];
-            addCommand: #viewTag  block: [:aTag | self viewTag: aTag];
+            addCommand: #viewTag  block: [:aTag  | self viewTag: aTag];
             addCommand: #viewDate block: [:aDate | self viewDate: aDate].
         tape := BlogTape new.
         header := BlogHeader new.
@@ -308,12 +284,14 @@ Seaside.WAComponent subclass: BlogApplication [
                     colSpan: 2;
                     with: [html render: header]].
             html tableRow:
-                [html tableData with: [html render: tape].
-                html tableData with: [html render: cloud]].
+                [html tableData with:
+                     [html div
+                          class: 'content';
+                          with: [html render: tape]].
+                 html tableData with: [html render: cloud]].
             html tableRow:
                 [html tableData
                     colSpan: 2;
-                    with: [html render: footer]].
-        ]
+                    with: [html render: footer]]]
     ]
 ]

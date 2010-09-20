@@ -31,63 +31,6 @@ Object subclass: BlogPost [
     ]
 ]
 
-Object subclass: BlogComment [
-    | text timestamp |
-
-    BlogComment class >> text: aString [
-        <category: 'instance creation'>
-        ^(self basicNew)
-            text: aString;
-            yourself
-    ]
-
-    text: aString [
-        <category: 'private'>
-        text := aString.
-        timestamp := DateTime today.
-    ]
-]
-
-BlogComment subclass: AuthorComment [
-]
-
-BlogComment subclass: GuestComment [
-    | name email www |
-    
-    GuestComment class >> name: aName email: aMail www: aWebsite text: aString [
-        <category: 'instance creation'>
-        ^(self text: aString)
-            name: aName email: aMail www: aWebsite;
-            yourself
-    ]
-
-    name: aName email: aMail www: aWebsite [
-        <category: 'private'>
-        name := aName.
-        email := aMail.
-        www := aWebsite.
-    ]
-]
-
-Object subclass: Storage [
-    posts := OrderedCollection new.
-
-    Storage class >> posts [
-        <category: 'accessing'>
-        ^posts
-    ]
-
-    Storage class >> add: aPost [
-        <category: 'accessing'>
-        posts addFirst: aPost
-    ]
-
-    Storage class >> remove: aPost [
-        <category: 'accessing'>
-        posts remove: aPost
-    ]
-]
-
 Object subclass: CommandHub [
     commands := Dictionary new.
 
@@ -113,5 +56,42 @@ Object subclass: Cloud [
                         count := tags at: eachTag ifAbsentPut: [0].
                         tags at: eachTag put: (count + 1)]].
         ^tags
+    ]
+]
+
+Object subclass: Storage [
+    posts := OrderedCollection new.
+
+    Storage class >> posts [
+        <category: 'accessing'>
+        ^posts
+    ]
+
+    Storage class >> add: aPost [
+        <category: 'accessing'>
+        posts addFirst: aPost
+    ]
+
+    Storage class >> remove: aPost [
+        <category: 'accessing'>
+        posts remove: aPost
+    ]
+
+    Storage class >> export: aFileName [
+        <category: 'serialization'>
+        | dumper stream |
+        stream := (File name: aFileName) writeStream.
+        dumper := ObjectDumper on: stream.
+        dumper dump: posts.
+        stream close.
+    ]
+
+    Storage class >> import: aFileName [
+        <category: 'serialization'>
+        | dumper stream |
+        stream := (File name: aFileName) readStream.
+        dumper := ObjectDumper on: stream.
+        posts := dumper load.
+        stream close.
     ]
 ]

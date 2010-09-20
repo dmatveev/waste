@@ -2,6 +2,10 @@ Seaside.WAFileLibrary subclass: BlogData [
     styleCss [
        <category: 'styles'>
         ^'
+/*----------------------------------------------------------------------------
+    Elements
+----------------------------------------------------------------------------*/
+
 body {
     font-family: serif;
     background-color: white;
@@ -9,41 +13,78 @@ body {
     padding: 0;
 }
 
+input.text {
+    width: 500px;
+    font-family: serif;
+    font-size: 100%;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+} 
+
+textarea {
+    width: 500px;
+    height: 100px;
+    font-family: serif;
+    font-size: 100%;
+}
+
 td {
     vertical-align: top;
 }
 
-.header {
-    margin: 0;
-    padding: 0;
-    font-family: arial, sans;
-    font-size: 180%;
-    background-color: skyblue;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #4682b4;
+
+
+/*----------------------------------------------------------------------------
+    Classes
+----------------------------------------------------------------------------*/
+
+.content {
+    width: 550px;
 }
 
-.tape {
-    // border-style: solid;
-    // border-width: 1px;
-    // border-color: pink;
+.header {
+    font-size: 180%;
+    padding-top: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: #4682b4;
 }
 
 .footer {
     margin: 0;
     padding: 0;
     font-size: 70%;
-    background-color: lightgray;
-    border-style: solid;
-    border-width: 1px;
-    border-color: gray;
+    border-top-style: solid;
+    border-top-width: 2px;
+    border-top-color: #4682b4;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
+.tape {
+}
+
+.post {
+    margin-top: 2px;
+    padding-left: 2px;
+    margin-bottom: 34px;
+    width: 100%;
+}
 
 .post-title {
     font-size: 120%;
     font-weight: bold;
+    color: black;
+
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: gray;
 }
 
 .post-timestamp {
@@ -51,15 +92,17 @@ td {
     margin-bottom: 10px;
 }
 
-.post {
-    background-color: lightyellow;
-    margin-top: 2px;
-    padding-left: 2px;
-    margin-bottom: 12px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: orange;
-    width: 420px;
+.post-content {
+    margin: 10px;
+}
+
+.post-text {
+    margin-bottom: 5px;
+}
+
+.post-tags {
+    font-size: 80%;
+    margin-bottom: 2px;
 }
 
 .post-action {
@@ -72,31 +115,15 @@ td {
     font-size: 80%;
 }
 
-.post-content {
-    margin: 10px;
-}
-
-.post-tags {
-    font-size: 80%;
-    margin-bottom: 2px;
-}
-
 .cloud {
-    background-color: #98fb98;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #32cd32;
+    border-left-style: solid;
+    border-left-width: 2px;
+    border-left-color: #4682b4;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-bottom: 20px;
+    width: 160px;
 }
-
-textarea {
-    width: 400px;
-    height: 100px;
-}
-
-p {
-    margin: 0;
-    padding: 0;
-} 
 '
     ]
 

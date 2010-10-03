@@ -294,5 +294,11 @@ Seaside.WAComponent subclass: BlogApplication [
                     colSpan: 2;
                     with: [html render: footer]]]
     ]
+
+    updateRoot: anHtmlRoot [
+        <category: 'seaside'>
+        super updateRoot: anHtmlRoot.
+        WasteConf style writeStyleOn: anHtmlRoot
+    ]
 ]
 

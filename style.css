@@ -1,0 +1,122 @@
+/*----------------------------------------------------------------------------
+    Elements
+----------------------------------------------------------------------------*/
+
+body {
+    font-family: serif;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+input.text {
+    width: 500px;
+    font-family: serif;
+    font-size: 100%;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+} 
+
+textarea {
+    width: 500px;
+    height: 100px;
+    font-family: serif;
+    font-size: 100%;
+}
+
+td {
+    vertical-align: top;
+}
+
+
+
+/*----------------------------------------------------------------------------
+    Classes
+----------------------------------------------------------------------------*/
+
+.content {
+    width: 550px;
+}
+
+.header {
+    font-size: 180%;
+    padding-top: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: #4682b4;
+}
+
+.footer {
+    margin: 0;
+    padding: 0;
+    font-size: 70%;
+    border-top-style: solid;
+    border-top-width: 2px;
+    border-top-color: #4682b4;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.tape {
+}
+
+.post {
+    margin-top: 2px;
+    padding-left: 2px;
+    margin-bottom: 34px;
+    width: 100%;
+}
+
+.post-title {
+    font-size: 120%;
+    font-weight: bold;
+    color: black;
+
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: gray;
+}
+
+.post-timestamp {
+    font-size: 80%;
+    margin-bottom: 10px;
+}
+
+.post-content {
+    margin: 10px;
+}
+
+.post-text {
+    margin-bottom: 5px;
+}
+
+.post-tags {
+    font-size: 80%;
+    margin-bottom: 2px;
+}
+
+.post-action {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.post-actions {
+    margin-top: 5px;
+    font-size: 80%;
+}
+
+.cloud {
+    border-left-style: solid;
+    border-left-width: 2px;
+    border-left-color: #4682b4;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-bottom: 20px;
+    width: 160px;
+}

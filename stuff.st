@@ -1,134 +1,59 @@
-Seaside.WAFileLibrary subclass: BlogData [
+Seaside.WAFileLibrary subclass: CustomFileLibrary [
+    stylesheet := ''.
+
+    CustomFileLibrary class >> stylesheet: aString [
+        <category: 'accessors'>
+        stylesheet := aString
+    ]
+
     styleCss [
-       <category: 'styles'>
-        ^'
-/*----------------------------------------------------------------------------
-    Elements
-----------------------------------------------------------------------------*/
-
-body {
-    font-family: serif;
-    background-color: white;
-    margin: 0;
-    padding: 0;
-}
-
-input.text {
-    width: 500px;
-    font-family: serif;
-    font-size: 100%;
-}
-
-p {
-    margin: 0;
-    padding: 0;
-} 
-
-textarea {
-    width: 500px;
-    height: 100px;
-    font-family: serif;
-    font-size: 100%;
-}
-
-td {
-    vertical-align: top;
-}
-
-
-
-/*----------------------------------------------------------------------------
-    Classes
-----------------------------------------------------------------------------*/
-
-.content {
-    width: 550px;
-}
-
-.header {
-    font-size: 180%;
-    padding-top: 5px;
-    padding-left: 15px;
-    padding-right: 15px;
-    border-bottom-style: solid;
-    border-bottom-width: 2px;
-    border-bottom-color: #4682b4;
-}
-
-.footer {
-    margin: 0;
-    padding: 0;
-    font-size: 70%;
-    border-top-style: solid;
-    border-top-width: 2px;
-    border-top-color: #4682b4;
-    padding-bottom: 5px;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-.tape {
-}
-
-.post {
-    margin-top: 2px;
-    padding-left: 2px;
-    margin-bottom: 34px;
-    width: 100%;
-}
-
-.post-title {
-    font-size: 120%;
-    font-weight: bold;
-    color: black;
-
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-bottom-color: gray;
-}
-
-.post-timestamp {
-    font-size: 80%;
-    margin-bottom: 10px;
-}
-
-.post-content {
-    margin: 10px;
-}
-
-.post-text {
-    margin-bottom: 5px;
-}
-
-.post-tags {
-    font-size: 80%;
-    margin-bottom: 2px;
-}
-
-.post-action {
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-.post-actions {
-    margin-top: 5px;
-    font-size: 80%;
-}
-
-.cloud {
-    border-left-style: solid;
-    border-left-width: 2px;
-    border-left-color: #4682b4;
-    margin-left: 5px;
-    padding-left: 5px;
-    padding-bottom: 20px;
-    width: 160px;
-}
-'
+        <category: 'accessors'>
+        ^stylesheet
     ]
 
     selectorsToInclude [
-        <category: 'accessing'>
-        ^#(#styleCss)
+        <category: 'accessors'>
+        ^Array with: #styleCss
+    ]
+]
+
+Object subclass: BlogLibraryStyleStorage [
+    on: anApp use: aFileName [
+        <category: 'style storage-private'>
+        CustomFileLibrary stylesheet: (File name: aFileName) readStream contents.
+        anApp preferenceAt: #libraries put: (Array with: CustomFileLibrary)
+    ]
+
+    writeStyleOn: aHTMLRoot [
+        <category: 'style storage'>
+        ^self
+    ]
+]
+
+Object subclass: BlogFileStyleStorage [
+    | url |
+
+    on: anApp use: aFileName [
+        <category: 'style storage-private'>
+        url := aFileName
+    ]
+
+    writeStyleOn: aHTMLRoot [
+        <category: 'style storage'>
+        aHTMLRoot stylesheet url: url
+    ]
+]
+
+Object subclass: WasteConf [
+    style := nil.
+
+    WasteConf class >> style: aStyleStore [
+        <category: 'accessors'>
+        style := aStyleStore
+    ]
+
+    WasteConf class >> style [
+        <category: 'accessors'>
+        ^style
     ]
 ]

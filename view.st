@@ -11,22 +11,23 @@
  ------------------------------------------------------------------------------"
 
 BlogPost extend [
-    renderTitleOn: html [
+    renderTitleOn: html session: aSession [
         <category: 'rendering-private'>
         html anchor
-            callback: [(CommandHub command: #view) value: self];
+            callback: [aSession blog view: self];
+            class: 'post-title';
             with: [html div
                        class: 'post-title';
                        with: [html text: title]]
     ]
 
-    renderTimeStampOn: html [
+    renderTimeStampOn: html session: aSession [
         <category: 'rendering-private'>
         html div
             class: 'post-timestamp';
             with: [html text: 'Posted on'; space.
                    html anchor
-                       callback: [(CommandHub command: #viewDate) value: self dated];
+                       callback: [aSession blog viewDate: self dated];
                        with: [html text: self dated printString].
                    html
                        space;
@@ -34,7 +35,7 @@ BlogPost extend [
                        text: timestamp asTime printString]        
     ]
 
-    renderTextOn: html [
+    renderTextOn: html session: aSession [
         <category: 'rendering-private'>
         html div
             class: 'post-content';
@@ -45,7 +46,7 @@ BlogPost extend [
                                         with: each]]]
     ]
 
-    renderTagsOn: html [
+    renderTagsOn: html session: aSession [
         <category: 'rendering-private'>
         html div
             class: 'post-tags';
@@ -58,18 +59,18 @@ BlogPost extend [
 
                 "TODO: introduce a Reusable tag component"
                 html anchor
-                    callback: [(CommandHub command: #viewTag) value: firstTag];
+                    callback: [aSession blog viewTag: firstTag];
                     with: [html text: firstTag].
 
                 otherTags do:
                     [:each |
                     html text: ','; space.
                     html anchor
-                        callback: [(CommandHub command: #viewTag) value: each];
+                        callback: [aSession blog viewTag: each];
                         with: [html text: each]]]
     ]
 
-    renderActionsOn: html [
+    renderActionsOn: html session: aSession [
         <category: 'rendering-private'>
         html div
             class: 'post-actions';
@@ -79,24 +80,24 @@ BlogPost extend [
                      class: 'post-action';
                      with: [html text: 'Add a comment'].
                  html anchor
-                     callback: [(CommandHub command: #edit) value: self];
+                     callback: [aSession blog edit: self];
                      class: 'post-action';
                      with: [html text: 'Edit'].
                  html anchor
-                     callback: [(CommandHub command: #remove) value: self];
+                     callback: [aSession blog remove: self];
                      class: 'post-action';
                      with: [html text: 'Remove']].
     ]
 
-    renderContentOn: html [
+    renderContentOn: html session: aSession [
         <category: 'rendering'>
         html div
             class: 'post';
-            with: [self renderTitleOn: html.
-                   self renderTimeStampOn: html.
-                   self renderTextOn: html.
-                   self renderTagsOn: html.
-                   self renderActionsOn: html]
+            with: [self renderTitleOn:     html session: aSession.
+                   self renderTimeStampOn: html session: aSession.
+                   self renderTextOn:      html session: aSession.
+                   self renderTagsOn:      html session: aSession.
+                   self renderActionsOn:   html session: aSession]
     ]
 ]
 
@@ -115,9 +116,9 @@ Seaside.WAComponent subclass: BlogPostComponent [
     
     renderContentOn: html [
         html anchor
-            callback: (CommandHub command: #home);
+            callback: [self session blog goHome];
             with: [html text: 'Back to posts'].
-        post renderContentOn: html.
+        post renderContentOn: html session.
     ]
 ]
 
@@ -126,7 +127,7 @@ Seaside.WAComponent subclass: BlogTape [
         <category: 'rendering-private'>
         "TODO: introduce a Decorator?"
         html anchor
-            callback: (CommandHub command: #compose);
+            callback: [self session blog compose];
             with: [html text: 'Add a post'].
     ]
 
@@ -135,7 +136,8 @@ Seaside.WAComponent subclass: BlogTape [
         self renderActionsOn: html.
         html div
             class: 'tape';
-            with: [self items do: [:each | each renderContentOn: html]]
+            with: [self items do: [:each | each renderContentOn: html
+                                                session: self session]]
     ]
 
     items [
@@ -156,7 +158,7 @@ BlogTape subclass: FilteredBlogTape [
         "TODO: introduce a Decorator?"
         "TODO: Reusable 'Back to posts' component"
         html anchor
-            callback: (CommandHub command: #home);
+            callback: [self session blog goHome];
             with: [html text: 'Back to posts'].
     ]
 
@@ -196,7 +198,7 @@ Seaside.WAComponent subclass: BlogCloud [
             class: 'cloud';
             with: [Cloud tags keysAndValuesDo: [:eachKey :eachValue |
                 html anchor
-                    callback: [(CommandHub command: #viewTag) value: eachKey];
+                    callback: [self session blog viewTag: eachKey];
                     with: [html text: eachKey].
                 html space; text: ('(', (eachValue asString), ')'); break]]
     ]
@@ -214,23 +216,24 @@ Seaside.WAComponent subclass: BlogApplication [
         <category: 'initialization'>
         super initialize.
 
-        CommandHub
-            addCommand: #compose  block: [self compose];
-            addCommand: #remove   block: [:aPost | self remove: aPost];
-            addCommand: #view     block: [:aPost | self view: aPost];
-            addCommand: #edit     block: [:aPost | self edit: aPost];
-            addCommand: #home     block: [self goHome];
-            addCommand: #viewTag  block: [:aTag  | self viewTag: aTag];
-            addCommand: #viewDate block: [:aDate | self viewDate: aDate].
+        self session blog: self.
+
         tape := BlogTape new.
         header := BlogHeader new.
         footer := BlogFooter new.
         cloud := BlogCloud new.
     ]
 
+    initialRequest: aRequest [
+        Transcript
+            << aRequest url; cr;
+            << (aRequest fields collect: [:each | each printString]); cr
+    ]
+
     compose [
         <category: 'functionality'>
         | aPost |
+        Transcript << 'hello'; cr.
         aPost := tape call: (BlogPost new asComponent addValidatedForm).
         aPost ifNotNil: [Storage add: aPost]
     ]
@@ -301,4 +304,3 @@ Seaside.WAComponent subclass: BlogApplication [
         WasteConf style writeStyleOn: anHtmlRoot
     ]
 ]
-

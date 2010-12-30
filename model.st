@@ -31,20 +31,6 @@ Object subclass: BlogPost [
     ]
 ]
 
-Object subclass: CommandHub [
-    commands := Dictionary new.
-
-    CommandHub class >> addCommand: aNameSymbol block: aBlock [
-        <category: 'functionality'>
-        ^commands at: aNameSymbol put: aBlock
-    ]
-
-    CommandHub class >> command: aNameSymbol [
-        <category: 'functionality'>
-        ^commands at: aNameSymbol
-    ]
-]
-
 Object subclass: Cloud [
     Cloud class >> tags [
         <category: 'accessing'>

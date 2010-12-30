@@ -8,10 +8,12 @@ Eval [
     app := BlogApplication registerAsApplication: 'waste'.
     app
         preferenceAt: #resourceBaseUrl put: '/';
-        preferenceAt: #serverProtocol put: #http;
-        preferenceAt: #serverHostname put: 'localhost';
-        preferenceAt: #serverPath put: '/';
-	    preferenceAt: #serverPort put: 8080.
+        preferenceAt: #serverProtocol  put: #http;
+        preferenceAt: #serverHostname  put: '192.168.1.113';
+        preferenceAt: #serverPath      put: '/';
+	    preferenceAt: #serverPort      put: 8080;
+        preferenceAt: #sessionClass    put: WasteSession;
+        preferenceAt: #mainClass       put: WasteRenderLoop.
 
     WasteConf style:
         (BlogLibraryStyleStorage new

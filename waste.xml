@@ -11,9 +11,11 @@
   <filein>descriptions.st</filein>
   <filein>view.st</filein>
   <filein>stuff.st</filein>
+  <filein>session.st</filein>
 
   <file>model.st</file>
   <file>descriptions.st</file>
   <file>view.st</file>
   <file>stuff.st</file>
+  <file>session.st</file>
 </package>

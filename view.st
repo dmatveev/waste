@@ -39,11 +39,14 @@ BlogPost extend [
         <category: 'rendering-private'>
         html div
             class: 'post-content';
-            with: 
-                [text linesDo:
-                    [:each | each ifNotNil: [html paragraph
-                                        class: 'post-text';
-                                        with: each]]]
+            with:
+                [| txt ast mdb |
+                txt := (text last = Character nl)
+                       ifTrue:  [text]
+                       ifFalse: [text, Character nl asString].
+                ast := MarkdownParser parse: txt.
+                mdb := MarkdownBuilder on: html.
+                ast do: [:each | each accept: mdb]]
     ]
 
     renderTagsOn: html session: aSession [

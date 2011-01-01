@@ -79,7 +79,7 @@ BlogPost extend [
             class: 'post-actions';
             with:
                 [html anchor
-                     callback: [];
+                     callback: [aSession blog composeCommentForPost: self];
                      class: 'post-action';
                      with: [html text: 'Add a comment'].
                  html anchor
@@ -96,16 +96,77 @@ BlogPost extend [
         <category: 'rendering'>
         html div
             class: 'post';
-            with: [self renderTitleOn:     html session: aSession.
-                   self renderTimeStampOn: html session: aSession.
-                   self renderTextOn:      html session: aSession.
-                   self renderTagsOn:      html session: aSession.
-                   self renderActionsOn:   html session: aSession]
+            with: [self renderTitleOn:     html session: aSession;
+                        renderTimeStampOn: html session: aSession;
+                        renderTextOn:      html session: aSession;
+                        renderTagsOn:      html session: aSession;
+                        renderActionsOn:   html session: aSession]
+    ]
+]
+
+BlogComment extend [
+    renderTitleOn: html session: aSession [
+        html div
+            class: 'comment-header';
+            with: [html anchor
+                       url: 'mailto:', email;
+                       with: [html text: name].
+                   html text: ' commented on ', self dated printString, ' at ',
+                              timestamp asTime printString]
+    ]
+
+    renderTextOn: html session: aSession [
+        <category: 'rendering-private'>
+        html div
+            class: 'comment-content';
+            with:
+                [| txt ast mdb |
+                txt := (text last = Character nl)
+                       ifTrue:  [text]
+                       ifFalse: [text, Character nl asString].
+                ast := MarkdownParser parse: txt.
+                mdb := MarkdownBuilder on: html.
+                ast do: [:each | each accept: mdb]]
+    ]
+
+    renderActionsOn: html session: aSession in: aPost [
+        html div
+            class: 'comment-actions';
+            with: [html anchor
+                     callback: [aSession blog remove: self of: aPost];
+                     class: 'comment-action';
+                     with: [html text: 'Remove']]
+    ]
+
+    renderContentOn: html session: aSession in: aPost [
+        html div
+            class: 'comment';
+            with: [self renderTitleOn:   html session: aSession;
+                        renderTextOn:    html session: aSession;
+                        renderActionsOn: html session: aSession in: aPost]
+    ]
+]
+
+Seaside.WAComponent subclass: BlogCommentTape [
+    | post |
+
+    BlogCommentTape class >> for: aPost [
+        <category: 'instance creation'>
+        ^self new post: aPost
+    ]
+
+    post: aPost [
+        <category: 'private'>
+        post := aPost
+    ]
+
+    renderContentOn: html [
+        post comments do:  [:e | e renderContentOn: html session: self session in: post] 
     ]
 ]
 
 Seaside.WAComponent subclass: BlogPostComponent [
-    | post |
+    | post tape |
 
     BlogPostComponent class >> for: aPost [
         <category: 'instance creation'>
@@ -115,13 +176,24 @@ Seaside.WAComponent subclass: BlogPostComponent [
     for: aPost [
         <category: 'private'>
         post := aPost.
+        tape := BlogCommentTape for: post
     ]
     
     renderContentOn: html [
         html anchor
             callback: [self session blog goHome];
             with: [html text: 'Back to posts'].
-        post renderContentOn: html session.
+        post renderContentOn: html session: self session.
+        html render: tape
+    ]
+
+    tape [
+        ^tape
+    ]
+
+    children [
+        <category: 'seaside'>
+        ^Array with: tape
     ]
 ]
 
@@ -241,10 +313,24 @@ Seaside.WAComponent subclass: BlogApplication [
         aPost ifNotNil: [Storage add: aPost]
     ]
 
+    composeCommentForPost: aPost [
+        | postComponent comment |
+        postComponent := BlogPostComponent for: aPost.
+        tape show: postComponent.
+        comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
+        comment ifNotNil: [aPost comment: comment]
+    ]
+
     remove: aPost [
         <category: 'functionality'>
         (tape confirm: ('Are you sure you want to delete post "', aPost title, '"?'))
             ifTrue: [Storage remove: aPost]
+    ]
+
+    remove: aComment of: aPost [
+        <category: 'functionality'>
+        (tape confirm: 'Are you sure you want to this comment?')
+            ifTrue: [aPost remove: aComment]
     ]
 
     view: aPost [

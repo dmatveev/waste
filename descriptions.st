@@ -74,3 +74,64 @@ BlogPost extend [
                 [:acc :each | acc ifNil: [each] ifNotNil: [acc, ', ', each]]]
     ]
 ]
+
+
+
+BlogComment class extend [
+    descriptionName [
+        <category: 'magritte'>
+        ^Magritte.MAStringDescription new
+            accessor: #name;
+            label: 'Name';
+            priority: 100;
+            addCondition: [:value | value isEmpty not];
+            beRequired;
+            yourself
+    ]
+
+    descriptionEmail [
+        <category: 'magritte'>
+        ^Magritte.MAStringDescription new
+            accessor: #email;
+            label: 'E-mail';
+            priority: 200;
+            yourself
+    ]
+    
+    descriptionText [
+        <category: 'magritte'>
+        ^Magritte.MAMemoDescription new
+            accessor: #text;
+            label: 'Text';
+            priority: 200;
+            addCondition: [:value | value isEmpty not];
+            beRequired;
+            yourself
+    ]
+]
+
+BlogComment extend [
+    text: aString [
+        text := aString
+    ]
+
+    text [
+        ^text
+    ]
+
+    name: aString [
+        name := aString
+    ]
+
+    name [
+        ^name
+    ]
+
+    email: aString [
+        email := aString
+    ]
+
+    email [
+        ^email
+    ]
+]

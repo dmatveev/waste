@@ -73,6 +73,30 @@ td {
     width: 100%;
 }
 
+.comment {
+    margin-top: 2px;
+    padding-left: 2px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.comment-header {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: lightgray;
+
+    font-size: 80%;
+}
+
+.comment-content {
+    margin: 10px;
+}
+
+.comment-actions {
+    margin-top: 5px;
+    font-size: 80%;
+}
+
 .post-title {
     font-size: 120%;
     font-weight: bold;
@@ -85,15 +109,10 @@ td {
 
 .post-timestamp {
     font-size: 80%;
-    margin-bottom: 10px;
 }
 
 .post-content {
     margin: 10px;
-}
-
-.post-text {
-    margin-bottom: 5px;
 }
 
 .post-tags {

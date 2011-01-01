@@ -10,6 +10,10 @@ Object subclass: BlogPost [
         comments := OrderedCollection new.
     ]
 
+    comments [
+        ^comments
+    ]
+
     comment: aComment [
         <category: 'comments'>
         comments add: aComment
@@ -23,6 +27,23 @@ Object subclass: BlogPost [
     tagged [
         <category: 'accessing'>
         ^tags
+    ]
+
+    dated [
+        <category: 'accessing'>
+        ^timestamp asDate
+    ]
+]
+
+Object subclass: BlogComment [
+    | name email text timestamp |
+    
+    BlogComment class >> new [
+        ^self basicNew initialize
+    ]
+
+    initialize [
+        timestamp := DateTime now.
     ]
 
     dated [

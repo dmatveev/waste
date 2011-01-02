@@ -14,6 +14,7 @@
   <filein>stuff.st</filein>
   <filein>session.st</filein>
   <filein>markdown.st</filein>
+  <filein>sections.st</filein>
 
   <file>model.st</file>
   <file>descriptions.st</file>
@@ -21,4 +22,5 @@
   <file>stuff.st</file>
   <file>session.st</file>
   <file>markdown.st</file>
+  <file>sections.st</file>
 </package>

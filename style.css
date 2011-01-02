@@ -5,12 +5,12 @@
 body {
     font-family: serif;
     background-color: white;
-    margin: 0;
+    margin: 0.2em;
     padding: 0;
 }
 
 input.text {
-    width: 500px;
+    width: 600px;
     font-family: serif;
     font-size: 100%;
 }
@@ -21,7 +21,7 @@ p {
 } 
 
 textarea {
-    width: 500px;
+    width: 600px;
     height: 100px;
     font-family: serif;
     font-size: 100%;
@@ -32,32 +32,35 @@ td {
 }
 
 
-
 /*----------------------------------------------------------------------------
     Classes
 ----------------------------------------------------------------------------*/
 
+/* Generic classes */
+
 .content {
-    width: 570px;
+    width: 800px;
 }
 
 .header {
     font-size: 180%;
+
     padding-top: 5px;
     padding-left: 15px;
     padding-right: 15px;
-    border-bottom-style: solid;
-    border-bottom-width: 2px;
-    border-bottom-color: #4682b4;
+    padding-bottom: 2px;
 }
 
 .footer {
     margin: 0;
     padding: 0;
+
     font-size: 70%;
+
     border-top-style: solid;
     border-top-width: 2px;
     border-top-color: #4682b4;
+
     padding-bottom: 5px;
     padding-left: 15px;
     padding-right: 15px;
@@ -66,6 +69,51 @@ td {
 .tape {
 }
 
+.cloud {
+    border-left-style: solid;
+    border-left-width: 2px;
+    border-left-color: #4682b4;
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-bottom: 20px;
+    width: 160px;
+}
+
+
+/* Sections */
+.sections {
+    width: 100%;
+    
+    border-top-style: solid;
+    border-top-width: 2px;
+    border-top-color: #4682b4;
+
+    margin-bottom: 10px;
+}
+
+.section, .section-active {
+    padding-left: 1em;
+    padding-right: 1em;
+    text-decoration: none;
+    background-color: white;
+}
+
+.section {
+}
+
+.section-active {
+    font-weight: bold;
+    background-color: #e0eeee;
+}
+
+/* Static text */
+
+.static-text {
+    margin: 10px;
+}
+
+/* Blog post */
+
 .post {
     margin-top: 2px;
     padding-left: 2px;
@@ -73,28 +121,8 @@ td {
     width: 100%;
 }
 
-.comment {
-    margin-top: 2px;
-    padding-left: 2px;
-    margin-bottom: 20px;
+.blog-content {
     width: 100%;
-}
-
-.comment-header {
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-bottom-color: lightgray;
-
-    font-size: 80%;
-}
-
-.comment-content {
-    margin: 10px;
-}
-
-.comment-actions {
-    margin-top: 5px;
-    font-size: 80%;
 }
 
 .post-title {
@@ -130,14 +158,31 @@ td {
     font-size: 80%;
 }
 
-.cloud {
-    border-left-style: solid;
-    border-left-width: 2px;
-    border-left-color: #4682b4;
-    margin-left: 5px;
-    padding-left: 5px;
-    padding-bottom: 20px;
-    width: 160px;
+
+/* Comment */
+
+.comment {
+    margin-top: 2px;
+    padding-left: 2px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.comment-header {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: lightgray;
+
+    font-size: 80%;
+}
+
+.comment-content {
+    margin: 10px;
+}
+
+.comment-actions {
+    margin-top: 5px;
+    font-size: 80%;
 }
 
 

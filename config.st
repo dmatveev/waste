@@ -1,9 +1,9 @@
-"-------------------------------------------------------------------------------
-    TODO: Replace with your settings
--------------------------------------------------------------------------------"
+" ------------------------------------------------------------------------------- "
+"     TODO: Replace with your settings "
+" ------------------------------------------------------------------------------- "
 
 Eval [
-    | app |
+    | app blog stat |
 
     app := BlogApplication registerAsApplication: 'waste'.
     app
@@ -12,15 +12,22 @@ Eval [
         preferenceAt: #serverHostname  put: 'localhost';
         preferenceAt: #serverPath      put: '/';
 	    preferenceAt: #serverPort      put: 8080;
-        preferenceAt: #sessionClass    put: WasteSession;
-        preferenceAt: #mainClass       put: WasteRenderLoop.
+        preferenceAt: #sessionClass    put: WasteSession.
+
+    blog  := BlogSection name: 'Blog'  alias: #blog  storage: BlogStorage new.
+    
+    stat := StaticSection name: 'TODO: Change Me' alias: #staticDemo.
+    stat text: 'This is an example of Static page'.
+
+    WasteConf sections empty; addAll: {blog. stat}.
+    WasteConf defaultSection: blog.
 
     WasteConf style:
         (BlogLibraryStyleStorage new
             on: app
             use: '/home/dmatveev/devel/waste/style.css').
 
-    "or"
+    " or "
     " WasteConf style: "
     "     (BlogFileStyleStorage new "
     "         on: app "

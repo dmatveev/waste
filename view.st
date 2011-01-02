@@ -1,158 +1,155 @@
-"-------------------------------------------------------------------------------
-    Yes. Domain object knows how to render it on html. Looks ugly? But now
-    BlogPost is almost the only class that deals with the post's inner
-    representation.
+Object subclass: MarkdownRenderer [
+    | text html |
 
-    I could introduce an additional BlogPostRenderer to generate html from
-    domain objects, but it requires a set of accessor methods in the BlogPost.
+    MarkdownRenderer class >> text: aString on: aCanvas [
+        <category: 'instance creation'>
+        ^self new text: aString on: aCanvas
+    ]
 
-    I do not like accessors (but a BlogPost _has_ it, see 'descriptors.st' -
-    they are used only for Magritte).
- ------------------------------------------------------------------------------"
+    text: aString on: aCanvas [
+        <category: 'private'>
+        text := aString.
+        html := aCanvas
+    ]
 
-BlogPost extend [
-    renderTitleOn: html session: aSession [
+    render [
+        | txt ast mdb |
+        txt := (text last = Character nl)
+                ifTrue:  [text]
+                ifFalse: [text, Character nl asString].
+        ast := MarkdownParser parse: txt.
+        mdb := MarkdownBuilder on: html.
+        ast do: [:each | each accept: mdb]
+    ]
+]
+
+Object subclass: ContentEntityRenderer [
+    | entity view html |
+
+    ContentEntityRenderer class >> for: anEntity in: aView on: aCanvas [
+        <category: 'instance creation'>
+        ^self new for: anEntity in: aView on: aCanvas
+    ]
+
+    for: anEntity in: aView on: aCanvas [
+        <category: 'private'>
+        entity := anEntity.
+        view := aView.
+        html := aCanvas.
+    ]
+
+    render [
+        <category: 'rendering'>
+        html div
+            class: self containerClass;
+            with: [self renderMessages do: [:e | self perform: e]]
+    ]
+
+    renderMessages [
+        <category: 'overriding'>
+        self shouldNotImplement
+    ]
+
+    containerClass [
+        <category: 'overriding'>
+        self shouldNotImplement
+    ]
+]
+
+ContentEntityRenderer subclass: BlogPostRenderer [
+    renderMessages [
+        <category: 'overriding'>
+        ^#(#renderTitle #renderTimeStamp #renderText #renderTags #renderActions)
+    ]
+
+    containerClass [
+        <category: 'overriding'>
+        ^'post'
+    ]
+
+    renderTitle [
         <category: 'rendering-private'>
         html anchor
-            callback: [aSession blog view: self];
+            callback: [view view: entity];
             class: 'post-title';
             with: [html div
                        class: 'post-title';
-                       with: [html text: title]]
+                       with: [html text: entity title]]
     ]
 
-    renderTimeStampOn: html session: aSession [
+    renderTimeStamp [
         <category: 'rendering-private'>
         html div
             class: 'post-timestamp';
             with: [html text: 'Posted on'; space.
                    html anchor
-                       callback: [aSession blog viewDate: self dated];
-                       with: [html text: self dated printString].
+                       callback: [view viewDate: entity dated];
+                       with: [html text: entity dated printString].
                    html
                        space;
                        text: 'at'; space;
-                       text: timestamp asTime printString]        
+                       text: entity timestamp asTime printString]
     ]
 
-    renderTextOn: html session: aSession [
+    renderText [
         <category: 'rendering-private'>
         html div
             class: 'post-content';
-            with:
-                [| txt ast mdb |
-                txt := (text last = Character nl)
-                       ifTrue:  [text]
-                       ifFalse: [text, Character nl asString].
-                ast := MarkdownParser parse: txt.
-                mdb := MarkdownBuilder on: html.
-                ast do: [:each | each accept: mdb]]
+            with: [(MarkdownRenderer text: entity text on: html) render]
     ]
 
-    renderTagsOn: html session: aSession [
+    renderTags [
         <category: 'rendering-private'>
         html div
             class: 'post-tags';
             with:
                 [| firstTag otherTags |
-                firstTag := tags first.
-                otherTags := tags allButFirst.
+                firstTag := entity tagged first.
+                otherTags := entity tagged allButFirst.
                 
                 html text: 'Tagged:'; space.
 
                 "TODO: introduce a Reusable tag component"
                 html anchor
-                    callback: [aSession blog viewTag: firstTag];
+                    callback: [view viewTag: firstTag];
                     with: [html text: firstTag].
 
                 otherTags do:
                     [:each |
                     html text: ','; space.
                     html anchor
-                        callback: [aSession blog viewTag: each];
+                        callback: [view viewTag: each];
                         with: [html text: each]]]
     ]
 
-    renderActionsOn: html session: aSession [
+    renderActions [
         <category: 'rendering-private'>
         html div
             class: 'post-actions';
             with:
                 [html anchor
-                     callback: [aSession blog composeCommentForPost: self];
+                     callback: [view composeCommentForPost: entity];
                      class: 'post-action';
                      with: [html text: 'Add a comment'].
                  html anchor
-                     callback: [aSession blog edit: self];
+                     callback: [view edit: entity];
                      class: 'post-action';
                      with: [html text: 'Edit'].
                  html anchor
-                     callback: [aSession blog remove: self];
+                     callback: [view remove: entity];
                      class: 'post-action';
                      with: [html text: 'Remove']].
     ]
-
-    renderContentOn: html session: aSession [
-        <category: 'rendering'>
-        html div
-            class: 'post';
-            with: [self renderTitleOn:     html session: aSession;
-                        renderTimeStampOn: html session: aSession;
-                        renderTextOn:      html session: aSession;
-                        renderTagsOn:      html session: aSession;
-                        renderActionsOn:   html session: aSession]
-    ]
 ]
 
-BlogComment extend [
-    renderTitleOn: html session: aSession [
-        html div
-            class: 'comment-header';
-            with: [html anchor
-                       url: 'mailto:', email;
-                       with: [html text: name].
-                   html text: ' commented on ', self dated printString, ' at ',
-                              timestamp asTime printString]
-    ]
-
-    renderTextOn: html session: aSession [
-        <category: 'rendering-private'>
-        html div
-            class: 'comment-content';
-            with:
-                [| txt ast mdb |
-                txt := (text last = Character nl)
-                       ifTrue:  [text]
-                       ifFalse: [text, Character nl asString].
-                ast := MarkdownParser parse: txt.
-                mdb := MarkdownBuilder on: html.
-                ast do: [:each | each accept: mdb]]
-    ]
-
-    renderActionsOn: html session: aSession in: aPost [
-        html div
-            class: 'comment-actions';
-            with: [html anchor
-                     callback: [aSession blog remove: self of: aPost];
-                     class: 'comment-action';
-                     with: [html text: 'Remove']]
-    ]
-
-    renderContentOn: html session: aSession in: aPost [
-        html div
-            class: 'comment';
-            with: [self renderTitleOn:   html session: aSession;
-                        renderTextOn:    html session: aSession;
-                        renderActionsOn: html session: aSession in: aPost]
-    ]
-]
-
-Seaside.WAComponent subclass: BlogCommentTape [
+ContentEntityRenderer subclass: BlogCommentRenderer [
     | post |
 
-    BlogCommentTape class >> for: aPost [
+    BlogCommentRenderer class >> for: anEntity post: aPost in: aView on: aCanvas [
         <category: 'instance creation'>
-        ^self new post: aPost
+        ^(self for: anEntity in: aView on: aCanvas)
+            post: aPost;
+            yourself
     ]
 
     post: aPost [
@@ -160,30 +157,85 @@ Seaside.WAComponent subclass: BlogCommentTape [
         post := aPost
     ]
 
+    renderTitle [
+        <category: 'rendering-private'>
+        html div
+            class: 'comment-header';
+            with: [html anchor
+                       url: 'mailto:', entity email;
+                       with: [html text: entity name].
+                   html text: ' commented on ', entity dated printString, ' at ',
+                              entity timestamp asTime printString]
+    ]
+
+    renderText [
+        <category: 'rendering-private'>
+        html div
+            class: 'comment-content';
+            with: [(MarkdownRenderer text: entity text on: html) render]
+    ]
+
+    renderActions [
+        <category: 'rendering-private'>
+        html div
+            class: 'comment-actions';
+            with: [html anchor
+                     callback: [view remove: entity of: post];
+                     class: 'comment-action';
+                     with: [html text: 'Remove']]
+    ]
+    renderMessages [
+        <category: 'overriding'>
+        ^#(#renderTitle #renderText #renderActions)
+    ]
+
+    containerClass [
+        <category: 'overriding'>
+        ^'comment'
+    ]
+]
+
+Seaside.WAComponent subclass: BlogCommentTape [
+    | post view |
+
+    BlogCommentTape class >> for: aPost view: aView [
+        <category: 'instance creation'>
+        ^self new post: aPost view: aView
+    ]
+
+    post: aPost view: aView [
+        <category: 'private'>
+        post := aPost.
+        view := aView
+    ]
+
     renderContentOn: html [
-        post comments do:  [:e | e renderContentOn: html session: self session in: post] 
+        post comments do:
+        [:e | (BlogCommentRenderer for: e post: post in: view on: html) render]
     ]
 ]
 
 Seaside.WAComponent subclass: BlogPostComponent [
-    | post tape |
+    | view post tape |
 
-    BlogPostComponent class >> for: aPost [
+    BlogPostComponent class >> for: aPost view: aView [
         <category: 'instance creation'>
-        ^self new for: aPost
+        ^self new for: aPost view: aView
     ]
 
-    for: aPost [
+    for: aPost view: aView [
         <category: 'private'>
         post := aPost.
-        tape := BlogCommentTape for: post
+        view := aView.
+        tape := BlogCommentTape for: post view: view.
     ]
     
     renderContentOn: html [
+        "TODO: Reusable Back to posts"
         html anchor
-            callback: [self session blog goHome];
+            callback: [view goHome];
             with: [html text: 'Back to posts'].
-        post renderContentOn: html session: self session.
+        (BlogPostRenderer for: post in: view on: html) render.
         html render: tape
     ]
 
@@ -198,11 +250,18 @@ Seaside.WAComponent subclass: BlogPostComponent [
 ]
 
 Seaside.WAComponent subclass: BlogTape [
+    | view |
+
+    view: aView [
+        <category: 'private'>
+        view := aView
+    ]
+
     renderActionsOn: html [
         <category: 'rendering-private'>
         "TODO: introduce a Decorator?"
         html anchor
-            callback: [self session blog compose];
+            callback: [view compose];
             with: [html text: 'Add a post'].
     ]
 
@@ -211,13 +270,14 @@ Seaside.WAComponent subclass: BlogTape [
         self renderActionsOn: html.
         html div
             class: 'tape';
-            with: [self items do: [:each | each renderContentOn: html
-                                                session: self session]]
+            with: [self items do:
+                  [:each | (BlogPostRenderer for: each in: view on: html)
+                           render]]
     ]
 
     items [
         <category: 'private'>
-        ^Storage posts
+        ^view section storage posts
     ]
 ]
 
@@ -233,7 +293,7 @@ BlogTape subclass: FilteredBlogTape [
         "TODO: introduce a Decorator?"
         "TODO: Reusable 'Back to posts' component"
         html anchor
-            callback: [self session blog goHome];
+            callback: [view goHome];
             with: [html text: 'Back to posts'].
     ]
 
@@ -267,55 +327,89 @@ Seaside.WAComponent subclass: BlogFooter [
 ]
 
 Seaside.WAComponent subclass: BlogCloud [
+    | view |
+
+    view: aView [
+        view := aView
+    ]
+
     renderContentOn: html [
         <catogory: 'rendering'>
         html div 
             class: 'cloud';
-            with: [Cloud tags keysAndValuesDo: [:eachKey :eachValue |
-                html anchor
-                    callback: [self session blog viewTag: eachKey];
-                    with: [html text: eachKey].
-                html space; text: ('(', (eachValue asString), ')'); break]]
+            with: [(Cloud tags: view section storage) keysAndValuesDo:
+                    [:eachKey :eachValue |
+                    html anchor
+                        callback: [view viewTag: eachKey];
+                        with: [html text: eachKey].
+                    html space; text: ('(', (eachValue asString), ')'); break]]
     ]
 ]
 
-Seaside.WAComponent subclass: BlogApplication [
-    | header footer tape cloud |
+Seaside.WAComponent subclass: BlogSections [
+    | selected |
 
-    BlogApplication class >> canBeRoot [
-        <category: 'testing'>
-        ^true
+    initialize [
+        <category: 'initialization'>
+        super initialize.
+        selected := WasteConf defaultSection
     ]
+
+    renderSection: aSection on: html [
+        <category: 'rendering-private'>
+        aSection alias = selected alias
+            ifTrue:  [html span
+                        class: 'section-active';
+                        with: [html text: aSection name]]
+            ifFalse: [html anchor
+                        callback: ["TODO: I DO NOT LIKE IT!"
+                                   selected := aSection.
+                                   self session blog open: aSection];
+                        class: 'section';
+                        with: [html text: aSection name]]
+    ]
+
+    renderContentOn: html [
+        <category: 'rendering'>
+        html div
+            class: 'sections';
+            with: [WasteConf sections do: [:e | self renderSection: e on: html]]
+    ]
+]
+
+Seaside.WAComponent subclass: SectionView [
+    | section |
+    
+    section: aSection [
+        section := aSection
+    ]
+
+    section [
+        ^section
+    ]
+]
+
+SectionView subclass: BlogView [
+    | tape cloud |
 
     initialize [
         <category: 'initialization'>
         super initialize.
 
-        self session blog: self.
-
-        tape := BlogTape new.
-        header := BlogHeader new.
-        footer := BlogFooter new.
-        cloud := BlogCloud new.
-    ]
-
-    initialRequest: aRequest [
-        Transcript
-            << aRequest url; cr;
-            << (aRequest fields collect: [:each | each printString]); cr
+        tape := BlogTape new view: self.
+        cloud := BlogCloud new view: self.
     ]
 
     compose [
         <category: 'functionality'>
         | aPost |
-        Transcript << 'hello'; cr.
         aPost := tape call: (BlogPost new asComponent addValidatedForm).
-        aPost ifNotNil: [Storage add: aPost]
+        aPost ifNotNil: [section storage add: aPost]
     ]
 
     composeCommentForPost: aPost [
         | postComponent comment |
-        postComponent := BlogPostComponent for: aPost.
+        postComponent := BlogPostComponent for: aPost view: self.
         tape show: postComponent.
         comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
         comment ifNotNil: [aPost comment: comment]
@@ -324,7 +418,7 @@ Seaside.WAComponent subclass: BlogApplication [
     remove: aPost [
         <category: 'functionality'>
         (tape confirm: ('Are you sure you want to delete post "', aPost title, '"?'))
-            ifTrue: [Storage remove: aPost]
+            ifTrue: [section storage remove: aPost]
     ]
 
     remove: aComment of: aPost [
@@ -335,17 +429,21 @@ Seaside.WAComponent subclass: BlogApplication [
 
     view: aPost [
         <category: 'functionality'>
-        tape show: (BlogPostComponent for: aPost)
+        tape show: (BlogPostComponent for: aPost view: self)
     ]
 
     viewTag: aTagString [
         <category: 'functionality'>
-        tape show: (FilteredBlogTape using: [:aPost | aPost tagged includes: aTagString])
+        tape show: ((FilteredBlogTape using:
+                    [:aPost | aPost tagged includes: aTagString])
+                        view: self)
     ]
 
     viewDate: aDate [
         <category: 'functionality'>
-        tape show: (FilteredBlogTape using: [:aPost | aPost dated = aDate])
+        tape show: ((FilteredBlogTape using:
+                    [:aPost | aPost dated = aDate])
+                        view: self)
     ]
 
     edit: aPost [
@@ -372,24 +470,69 @@ Seaside.WAComponent subclass: BlogApplication [
         <category: 'rendering'>
         html table:
             [html tableRow:
-                [html tableData
-                    colSpan: 2;
-                    with: [html render: header]].
-            html tableRow:
-                [html tableData with:
-                     [html div
-                          class: 'content';
-                          with: [html render: tape]].
-                 html tableData with: [html render: cloud]].
-            html tableRow:
-                [html tableData
-                    colSpan: 2;
-                    with: [html render: footer]]]
+                [html tableData class: 'blog-content';
+                                with: [html render: tape].
+                 html tableData with: [html render: cloud]]]
+    ]
+]
+
+SectionView subclass: StaticView [
+    renderContentOn: html [
+        <category: 'rendering'>
+        html div
+            class: 'static-text';
+            with: [(MarkdownRenderer text: section text on: html) render]
+    ]
+]
+
+Seaside.WAComponent subclass: BlogApplication [
+    | header body footer sections |
+
+    BlogApplication class >> canBeRoot [
+        <category: 'testing'>
+        ^true
+    ]
+
+    initialize [
+        <category: 'initialization'>
+        super initialize.
+        self session blog: self.
+
+        header   := BlogHeader new.
+        footer   := BlogFooter new.
+        sections := BlogSections new.
+        self open: WasteConf defaultSection
+    ]
+
+    open: aSection [
+        | view |
+        view := aSection view.
+        body ifNil: [body := view] ifNotNil: [body show: view]
     ]
 
     updateRoot: anHtmlRoot [
         <category: 'seaside'>
         super updateRoot: anHtmlRoot.
         WasteConf style writeStyleOn: anHtmlRoot
+    ]
+
+    renderContentOn: html [
+        <category: 'rendering'>
+        html div
+            class: 'content';
+            with: [html render: header;
+                        render: sections;
+                        render: body;
+                        render: footer].
+    ]
+
+    states [
+        <category: 'seaside'>
+        ^Array with: sections with: body
+    ]
+
+    children [
+        <category: 'seaside'>
+        ^Array with: sections with: body
     ]
 ]

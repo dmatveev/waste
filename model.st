@@ -1,12 +1,30 @@
-Object subclass: BlogPost [
-    | text title timestamp tags comments |
+Object subclass: ContentEntity [
+    | timestamp |
 
-    BlogPost class >> new [
-        ^ self basicNew initialize
+    ContentEntity class >> new [
+        <category: 'instance creation'>
+        ^self basicNew initialize
     ]
 
     initialize [
-        timestamp := DateTime now.
+        timestamp := DateTime now
+    ]
+
+    timestamp [
+        ^timestamp
+    ]
+
+    dated [
+        <category: 'accessing'>
+        ^timestamp asDate
+    ]
+]
+
+ContentEntity subclass: BlogPost [
+    | text title tags comments |
+
+    initialize [
+        super initialize.
         comments := OrderedCollection new.
     ]
 
@@ -28,36 +46,18 @@ Object subclass: BlogPost [
         <category: 'accessing'>
         ^tags
     ]
-
-    dated [
-        <category: 'accessing'>
-        ^timestamp asDate
-    ]
 ]
 
-Object subclass: BlogComment [
-    | name email text timestamp |
-    
-    BlogComment class >> new [
-        ^self basicNew initialize
-    ]
-
-    initialize [
-        timestamp := DateTime now.
-    ]
-
-    dated [
-        <category: 'accessing'>
-        ^timestamp asDate
-    ]
+ContentEntity subclass: BlogComment [
+    | name email text |
 ]
 
 Object subclass: Cloud [
-    Cloud class >> tags [
+    Cloud class >> tags: storage [
         <category: 'accessing'>
         | tags |
         tags := Dictionary new.
-        Storage posts do:
+        storage posts do:
             [:eachPost |
                 eachPost tagged do:
                     [:eachTag || count |
@@ -67,25 +67,24 @@ Object subclass: Cloud [
     ]
 ]
 
-Object subclass: Storage [
-    posts := OrderedCollection new.
+Object subclass: BlogStorage [
+    | posts |
 
-    Storage class >> posts [
-        <category: 'accessing'>
-        ^posts
+    posts [
+        ^posts ifNil: [posts := OrderedCollection new]
     ]
 
-    Storage class >> add: aPost [
+    add: aPost [
         <category: 'accessing'>
         posts addFirst: aPost
     ]
 
-    Storage class >> remove: aPost [
+    remove: aPost [
         <category: 'accessing'>
         posts remove: aPost
     ]
 
-    Storage class >> export: aFileName [
+    export: aFileName [
         <category: 'serialization'>
         | dumper stream |
         stream := (File name: aFileName) writeStream.
@@ -94,7 +93,7 @@ Object subclass: Storage [
         stream close.
     ]
 
-    Storage class >> import: aFileName [
+    import: aFileName [
         <category: 'serialization'>
         | dumper stream |
         stream := (File name: aFileName) readStream.

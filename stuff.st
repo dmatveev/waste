@@ -45,7 +45,9 @@ Object subclass: BlogFileStyleStorage [
 ]
 
 Object subclass: WasteConf [
-    style := nil.
+    style          := nil.
+    sections       := OrderedCollection new.
+    defaultSection := nil.
 
     WasteConf class >> style: aStyleStore [
         <category: 'accessors'>
@@ -55,5 +57,20 @@ Object subclass: WasteConf [
     WasteConf class >> style [
         <category: 'accessors'>
         ^style
+    ]
+
+    WasteConf class >> sections [
+        <category: 'accessors'>
+        ^sections
+    ]
+
+    WasteConf class >> defaultSection [
+        <category: 'accessors'>
+        ^defaultSection
+    ]
+
+    WasteConf class >> defaultSection: aSection [
+        <category: 'accessors'>
+        defaultSection := aSection
     ]
 ]

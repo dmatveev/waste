@@ -75,7 +75,7 @@ Object subclass: WasteConf [
     ]
 
     WasteConf class >> subheader: aString [
-        header := aString
+        subheader := aString
     ]
     
     WasteConf class >> footer: aString [

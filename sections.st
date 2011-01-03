@@ -59,6 +59,22 @@ Section subclass: StaticSection [
     
     view [
         <category: 'accessing'>
-        ^StaticView new section: self
+        ^self viewClass new section: self
+    ]
+
+    viewClass [
+        self shouldNotImplement
+    ]
+]
+
+StaticSection subclass: MarkdownSection [
+    viewClass [
+        ^MarkdownView
+    ]
+]
+
+StaticSection subclass: HTMLSection [
+    viewClass [
+        ^HTMLView
     ]
 ]

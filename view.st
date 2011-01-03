@@ -499,12 +499,21 @@ SectionView subclass: BlogView [
     ]
 ]
 
-SectionView subclass: StaticView [
+SectionView subclass: MarkdownView [
     renderContentOn: html [
         <category: 'rendering'>
         html div
             class: 'static-text';
             with: [(MarkdownRenderer text: section text on: html) render]
+    ]
+]
+
+SectionView subclass: HTMLView [
+    renderContentOn: html [
+        <category: 'rendering'>
+        html div
+            class: 'static-text';
+            with: [html html: section text]
     ]
 ]
 

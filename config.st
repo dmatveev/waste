@@ -14,10 +14,10 @@ Eval [
             alias: #blog
             storage: (AutoMemoryBlogStorage new on: 'blog.bin').
     
-    stat := StaticSection
+    stat := HTMLSection
             name: 'TODO: Change Me'
             alias: #staticDemo.
-    stat text: 'This is an example of Static page'.
+    stat text: '<b>Hello!</b> Yep'.
 
     WasteConf sections empty; addAll: {blog. stat}.
     WasteConf defaultSection: blog.

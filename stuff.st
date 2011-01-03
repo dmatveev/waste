@@ -66,6 +66,24 @@ Object subclass: WasteConf [
     style          := nil.
     sections       := OrderedCollection new.
     defaultSection := nil.
+    header         := 'TODO: Write your header here!'.
+    footer         := 'TODO: Write your footer here!'.
+
+    WasteConf class >> header: aString [
+        header := aString
+    ]
+
+    WasteConf class >> footer: aString [
+        footer := aString
+    ]
+
+    WasteConf class >> header [
+        ^header
+    ]
+
+    WasteConf class >> footer [
+        ^footer
+    ]
 
     WasteConf class >> style: aStyleStore [
         <category: 'accessors'>

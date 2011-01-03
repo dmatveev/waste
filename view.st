@@ -314,7 +314,7 @@ Seaside.WAComponent subclass: BlogHeader [
         <category: 'rendering'>
         html div
             class: 'header';
-            with: [html text: 'TODO: Write your header here!']
+            with: [html text: WasteConf header]
     ]
 ]
 
@@ -323,7 +323,7 @@ Seaside.WAComponent subclass: BlogFooter [
         <catogory: 'rendering'>
         html div
             class: 'footer';
-            with: [html text: 'TODO: Write your footer here!']
+            with: [html text: WasteConf footer]
     ]
 ]
 

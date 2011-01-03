@@ -17,15 +17,15 @@ Eval [
     stat := HTMLSection
             name: 'TODO: Change Me'
             alias: #staticDemo.
-    stat text: '<b>Hello!</b> Yep'.
+    stat text: 'chop'.
 
     WasteConf sections empty; addAll: {blog. stat}.
     WasteConf defaultSection: blog.
 
     WasteConf style: (BlogLibraryStyleStorage
-                      using: '/home/dmatveev/devel/waste/style.css').
+    using: '/home/dmatveev/devel/waste/style.css').
 
     " or "
     " WasteConf style: (BlogFileStyleStorage "
-    "                   using: 'http://dmitrymatveev.co.uk/styles/blog.css'). "
+    " using: 'http://dmitrymatveev.co.uk/styles/blog.css'). "
 ]

@@ -70,7 +70,7 @@ ContentEntityRenderer subclass: BlogPostRenderer [
     renderTitle [
         <category: 'rendering-private'>
         html anchor
-            callback: [view view: entity];
+            url: '?section=', view section alias asString, '&id=', entity id asString;
             class: 'post-title';
             with: [html div
                        class: 'post-title';
@@ -83,7 +83,8 @@ ContentEntityRenderer subclass: BlogPostRenderer [
             class: 'post-timestamp';
             with: [html text: 'Posted on'; space.
                    html anchor
-                       callback: [view viewDate: entity dated];
+                       url: '?section=', view section alias asString,
+                            '&date=', entity dated printString;
                        with: [html text: entity dated printString].
                    html
                        space;
@@ -111,14 +112,14 @@ ContentEntityRenderer subclass: BlogPostRenderer [
 
                 "TODO: introduce a Reusable tag component"
                 html anchor
-                    callback: [view viewTag: firstTag];
+                    url: '?section=', view section alias asString, '&tag=', firstTag;
                     with: [html text: firstTag].
 
                 otherTags do:
                     [:each |
                     html text: ','; space.
                     html anchor
-                        callback: [view viewTag: each];
+                        url: '?section=', view section alias asString, '&tag=', each;
                         with: [html text: each]]]
     ]
 
@@ -233,7 +234,7 @@ Seaside.WAComponent subclass: BlogPostComponent [
     renderContentOn: html [
         "TODO: Reusable Back to posts"
         html anchor
-            callback: [view goHome];
+            url: '?section=', view section alias asString;
             with: [html text: 'Back to posts'].
         (BlogPostRenderer for: post in: view on: html) render.
         html render: tape
@@ -293,7 +294,7 @@ BlogTape subclass: FilteredBlogTape [
         "TODO: introduce a Decorator?"
         "TODO: Reusable 'Back to posts' component"
         html anchor
-            callback: [view goHome];
+            url: '?section=', view section alias asString;
             with: [html text: 'Back to posts'].
     ]
 
@@ -340,7 +341,7 @@ Seaside.WAComponent subclass: BlogCloud [
             with: [(Cloud tags: view section storage) keysAndValuesDo:
                     [:eachKey :eachValue |
                     html anchor
-                        callback: [view viewTag: eachKey];
+                        url: '?section=', view section alias asString, '&tag=', eachKey;
                         with: [html text: eachKey].
                     html space; text: ('(', (eachValue asString), ')'); break]]
     ]
@@ -352,7 +353,16 @@ Seaside.WAComponent subclass: BlogSections [
     initialize [
         <category: 'initialization'>
         super initialize.
-        selected := WasteConf defaultSection
+        selected := WasteConf defaultSection.
+    ]
+
+    initialRequest: aRequest [
+        <category: 'seaside'>
+        super initialRequest: aRequest.
+        aRequest at: 'section' ifPresent:
+           [:section || sec |
+            sec := WasteConf sections detect: [:e | e alias = section asSymbol].
+            sec ifNotNil: [selected := sec]].
     ]
 
     renderSection: aSection on: html [
@@ -362,9 +372,7 @@ Seaside.WAComponent subclass: BlogSections [
                         class: 'section-active';
                         with: [html text: aSection name]]
             ifFalse: [html anchor
-                        callback: ["TODO: I DO NOT LIKE IT!"
-                                   selected := aSection.
-                                   self session blog open: aSection];
+                        url: '?section=', aSection alias asString;
                         class: 'section';
                         with: [html text: aSection name]]
     ]
@@ -468,6 +476,19 @@ SectionView subclass: BlogView [
         ^Array with: tape with: cloud
     ]
 
+    initialRequest: aRequest [
+        <category: 'seaside'>
+        super initialRequest: aRequest.
+        aRequest at: 'id' ifPresent:
+            [:id | ^self view: (section storage posts detect: [:e | e id = id asInteger])]. 
+
+        aRequest at: 'tag' ifPresent:
+            [:tag | ^self viewTag: tag].
+
+        aRequest at: 'date' ifPresent:
+            [:date | ^self viewDate: (Date readFrom: date readStream)]
+    ]
+
     renderContentOn: html [
         <category: 'rendering'>
         html table:
@@ -516,6 +537,16 @@ Seaside.WAComponent subclass: BlogApplication [
         <category: 'seaside'>
         super updateRoot: anHtmlRoot.
         WasteConf style writeStyleOn: anHtmlRoot
+    ]
+
+    initialRequest: aRequest [
+        <category: 'seaside'>
+        super initialRequest: aRequest.
+        aRequest at: 'section' ifPresent:
+           [:section || sec |
+            sec := WasteConf sections detect: [:e | e alias = section asSymbol].
+            sec ifNotNil: [self open: sec]].
+        aRequest at: 'section' ifAbsent: [self open: WasteConf defaultSection]
     ]
 
     renderContentOn: html [

@@ -21,12 +21,20 @@ Object subclass: ContentEntity [
 ]
 
 ContentEntity subclass: BlogPost [
-    | text title tags comments |
+    | id text title tags comments |
 
     initialize [
         <category: 'initialization'>
         super initialize.
         comments := OrderedCollection new
+    ]
+
+    id: anInteger [
+        id := anInteger
+    ]
+
+    id [
+        ^id
     ]
 
     tagged [

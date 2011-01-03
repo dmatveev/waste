@@ -67,18 +67,27 @@ Object subclass: WasteConf [
     sections       := OrderedCollection new.
     defaultSection := nil.
     header         := 'TODO: Write your header here!'.
+    subheader      := 'TODO: Write your subheader here!'.
     footer         := 'TODO: Write your footer here!'.
 
     WasteConf class >> header: aString [
         header := aString
     ]
 
+    WasteConf class >> subheader: aString [
+        header := aString
+    ]
+    
     WasteConf class >> footer: aString [
         footer := aString
     ]
 
     WasteConf class >> header [
         ^header
+    ]
+
+    WasteConf class >> subheader [
+        ^subheader
     ]
 
     WasteConf class >> footer [

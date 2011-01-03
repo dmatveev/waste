@@ -314,7 +314,11 @@ Seaside.WAComponent subclass: BlogHeader [
         <category: 'rendering'>
         html div
             class: 'header';
-            with: [html text: WasteConf header]
+            with: [html text: WasteConf header].
+
+        html div
+            class: 'subheader';
+            with: [html text: WasteConf subheader]
     ]
 ]
 

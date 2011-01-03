@@ -1,9 +1,5 @@
 Seaside.WASession subclass: WasteSession [
-    | announcer blog |
-
-    announcer [
-        ^announcer ifNil: [announcer := Announcer new]
-    ]
+    | blog |
 
     blog [
         ^blog
@@ -14,16 +10,16 @@ Seaside.WASession subclass: WasteSession [
     ]
 
     returnResponse: aResponse [
-        (self currentRequest cookieAt: self application handlerCookieName) 
-            ifNil: [ aResponse addCookie: self sessionCookie ].
+        " (self currentRequest cookieAt: self application handlerCookieName)  "
+        "     ifNil: [ aResponse addCookie: self sessionCookie ]. "
         ^super returnResponse: aResponse
     ]
 
     actionUrlForKey: aString [
         | url |
         url := super actionUrlForKey: aString.
-        (self currentRequest cookieAt: self application handlerCookieName) 
-            ifNotNil: [ url parameters removeKey: self application handlerField ].
+        " (self currentRequest cookieAt: self application handlerCookieName)  "
+        "     ifNotNil: [ url parameters removeKey: self application handlerField ]. "
         ^url
     ]
 ]

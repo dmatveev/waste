@@ -7,10 +7,11 @@ body {
     background-color: white;
     margin: 0.2em;
     padding: 0;
+    height: 100%;
 }
 
 input.text {
-    width: 600px;
+    width: 540px;
     font-family: serif;
     font-size: 100%;
 }
@@ -21,7 +22,7 @@ p {
 } 
 
 textarea {
-    width: 600px;
+    width: 540px;
     height: 100px;
     font-family: serif;
     font-size: 100%;
@@ -42,6 +43,10 @@ td {
     width: 800px;
 }
 
+.body {
+    height: 100%;
+}
+
 .header {
     font-size: 180%;
 
@@ -55,7 +60,7 @@ td {
     margin: 0;
     padding: 0;
 
-    font-size: 70%;
+    font-size: 80%;
 
     border-top-style: solid;
     border-top-width: 2px;
@@ -88,7 +93,9 @@ td {
     border-top-width: 2px;
     border-top-color: #4682b4;
 
-    margin-bottom: 10px;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: #4682b4;
 }
 
 .section, .section-active {

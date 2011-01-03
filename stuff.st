@@ -1,7 +1,7 @@
-Seaside.WAFileLibrary subclass: CustomFileLibrary [
+Seaside.WAFileLibrary subclass: SeasideFiles [
     stylesheet := ''.
 
-    CustomFileLibrary class >> stylesheet: aString [
+    SeasideFiles class >> stylesheet: aString [
         <category: 'accessors'>
         stylesheet := aString
     ]
@@ -17,11 +17,25 @@ Seaside.WAFileLibrary subclass: CustomFileLibrary [
     ]
 ]
 
-Object subclass: BlogLibraryStyleStorage [
-    on: anApp use: aFileName [
+Object subclass: BlogStyleStorage [
+    BlogStyleStorage class >> using: aFilename [
+        <category: 'instance creation'>
+        ^self new using: aFilename
+    ]
+
+    using: aFilename [
+        self shouldNotImplement
+    ]
+]
+
+BlogStyleStorage subclass: BlogLibraryStyleStorage [
+    using: aFileName [
         <category: 'style storage-private'>
-        CustomFileLibrary stylesheet: (File name: aFileName) readStream contents.
-        anApp preferenceAt: #libraries put: (Array with: CustomFileLibrary)
+        SeasideFiles stylesheet: (File name: aFileName) readStream contents.
+    ]
+
+    app: anApp [
+        anApp preferenceAt: #libraries put: (Array with: SeasideFiles)
     ]
 
     writeStyleOn: aHTMLRoot [
@@ -30,12 +44,15 @@ Object subclass: BlogLibraryStyleStorage [
     ]
 ]
 
-Object subclass: BlogFileStyleStorage [
+BlogStyleStorage subclass: BlogFileStyleStorage [
     | url |
 
-    on: anApp use: aFileName [
+    using: aFileName [
         <category: 'style storage-private'>
         url := aFileName
+    ]
+
+    app: anApp [
     ]
 
     writeStyleOn: aHTMLRoot [
@@ -45,13 +62,15 @@ Object subclass: BlogFileStyleStorage [
 ]
 
 Object subclass: WasteConf [
+    app            := nil.
     style          := nil.
     sections       := OrderedCollection new.
     defaultSection := nil.
 
     WasteConf class >> style: aStyleStore [
         <category: 'accessors'>
-        style := aStyleStore
+        style := aStyleStore.
+        style app: app
     ]
 
     WasteConf class >> style [
@@ -72,5 +91,29 @@ Object subclass: WasteConf [
     WasteConf class >> defaultSection: aSection [
         <category: 'accessors'>
         defaultSection := aSection
+    ]
+
+    WasteConf class >> init [
+        app := BlogApplication registerAsApplication: 'waste'.
+        app preferenceAt: #sessionClass put: WasteSession.
+
+        Seaside.WADispatcher default
+            setName: '';
+            defaultName: 'waste'
+    ]
+    
+    WasteConf class >> proto: aSymbol host: aHost port: anInteger [
+        ^self proto: aSymbol host: aHost port: anInteger
+              svcPath: '/' rcPath: '/'
+    ]
+    
+    WasteConf class >> proto: aSymbol host: aHost port: anInteger
+                       svcPath: anSvcPath rcPath: anRCPath [
+        app
+            preferenceAt: #resourceBaseUrl put: anRCPath;
+            preferenceAt: #serverProtocol  put: aSymbol;
+            preferenceAt: #serverHostname  put: aHost;
+            preferenceAt: #serverPath      put: anSvcPath;
+            preferenceAt: #serverPort      put: anInteger
     ]
 ]

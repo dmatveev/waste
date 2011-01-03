@@ -1,5 +1,5 @@
 Object subclass: ContentEntity [
-    | timestamp |
+    | id timestamp |
 
     ContentEntity class >> new [
         <category: 'instance creation'>
@@ -24,27 +24,26 @@ ContentEntity subclass: BlogPost [
     | text title tags comments |
 
     initialize [
+        <category: 'initialization'>
         super initialize.
-        comments := OrderedCollection new.
-    ]
-
-    comments [
-        ^comments
-    ]
-
-    comment: aComment [
-        <category: 'comments'>
-        comments add: aComment
-    ]
-
-    remove: aComment [
-        <category: 'comments'>
-        comments remove: aComment
+        comments := OrderedCollection new
     ]
 
     tagged [
         <category: 'accessing'>
         ^tags
+    ]
+    
+    comments [
+        ^comments
+    ]
+
+    comment: aComment [
+        comments add: aComment
+    ]
+
+    remove: aComment [
+        comments remove: aComment
     ]
 ]
 
@@ -62,43 +61,7 @@ Object subclass: Cloud [
                 eachPost tagged do:
                     [:eachTag || count |
                         count := tags at: eachTag ifAbsentPut: [0].
-                        tags at: eachTag put: (count + 1)]].
+                        tags at: eachTag put: count + 1]].
         ^tags
-    ]
-]
-
-Object subclass: BlogStorage [
-    | posts |
-
-    posts [
-        ^posts ifNil: [posts := OrderedCollection new]
-    ]
-
-    add: aPost [
-        <category: 'accessing'>
-        posts addFirst: aPost
-    ]
-
-    remove: aPost [
-        <category: 'accessing'>
-        posts remove: aPost
-    ]
-
-    export: aFileName [
-        <category: 'serialization'>
-        | dumper stream |
-        stream := (File name: aFileName) writeStream.
-        dumper := ObjectDumper on: stream.
-        dumper dump: posts.
-        stream close.
-    ]
-
-    import: aFileName [
-        <category: 'serialization'>
-        | dumper stream |
-        stream := (File name: aFileName) readStream.
-        dumper := ObjectDumper on: stream.
-        posts := dumper load.
-        stream close.
     ]
 ]

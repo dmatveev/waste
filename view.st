@@ -371,9 +371,7 @@ Seaside.WAComponent subclass: BlogSections [
 
     renderContentOn: html [
         <category: 'rendering'>
-        html div
-            class: 'sections';
-            with: [WasteConf sections do: [:e | self renderSection: e on: html]]
+        WasteConf sections do: [:e | self renderSection: e on: html]
     ]
 ]
 
@@ -412,7 +410,8 @@ SectionView subclass: BlogView [
         postComponent := BlogPostComponent for: aPost view: self.
         tape show: postComponent.
         comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
-        comment ifNotNil: [aPost comment: comment]
+        comment ifNotNil: [aPost comment: comment.
+                           section storage commit: aPost]
     ]
 
     remove: aPost [
@@ -424,7 +423,8 @@ SectionView subclass: BlogView [
     remove: aComment of: aPost [
         <category: 'functionality'>
         (tape confirm: 'Are you sure you want to this comment?')
-            ifTrue: [aPost remove: aComment]
+            ifTrue: [aPost remove: aComment.
+                     section storage commit: aPost]
     ]
 
     view: aPost [
@@ -448,7 +448,9 @@ SectionView subclass: BlogView [
 
     edit: aPost [
         <category: 'functionality'>
-        tape show: (aPost asComponent addValidatedForm).
+        | post |
+        post := tape call: (aPost asComponent addValidatedForm).
+        post ifNotNil: [section storage commit: post]
     ]
 
     goHome [
@@ -518,12 +520,14 @@ Seaside.WAComponent subclass: BlogApplication [
 
     renderContentOn: html [
         <category: 'rendering'>
-        html div
-            class: 'content';
-            with: [html render: header;
-                        render: sections;
-                        render: body;
-                        render: footer].
+        html table
+            class: 'content'; with:
+                [html tableRow: [html tableData: [html render: header]].
+                 html tableRow: [html tableData
+                                     class: 'sections';
+                                     with: [html render: sections]].
+                 html tableRow: [html tableData: [html render: body]].
+                 html tableRow: [html tableData: [html render: footer]]]
     ]
 
     states [

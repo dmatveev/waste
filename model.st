@@ -41,7 +41,7 @@ ContentEntity subclass: BlogPost [
         <category: 'accessing'>
         ^tags
     ]
-    
+   
     comments [
         ^comments
     ]
@@ -56,7 +56,15 @@ ContentEntity subclass: BlogPost [
 ]
 
 ContentEntity subclass: BlogComment [
-    | name email text |
+    | name email text replyOn |
+
+    replyOn: aComment [
+        replyOn := aComment
+    ]
+
+    replyOn [
+        ^replyOn
+    ]
 ]
 
 Object subclass: Cloud [

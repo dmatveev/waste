@@ -168,7 +168,11 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
                        url: 'mailto:', entity email;
                        with: [html text: entity name].
                    html text: ' commented on ', entity dated printString, ' at ',
-                              entity timestamp asTime printString]
+                              entity timestamp asTime printString.
+                   entity replyOn ifNotNil:
+                   [html text: ' in reply to ', entity replyOn name,
+                               ' (', entity replyOn dated printString, ' ',
+                                     entity replyOn timestamp asTime printString, ')']]
     ]
 
     renderText [
@@ -182,7 +186,12 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
         <category: 'rendering-private'>
         html div
             class: 'comment-actions';
-            with: [(view session user permissions includes: #canModerate) ifTrue:
+            with: [(view session user permissions includes: #canComment) ifTrue:
+                   [html anchor
+                     callback: [view replyOn: entity of: post];
+                     class: 'comment-action';
+                     with: [html text: 'Reply']].
+                   (view session user permissions includes: #canModerate) ifTrue:
                    [html anchor
                      callback: [view remove: entity of: post];
                      class: 'comment-action';
@@ -537,10 +546,22 @@ SectionView subclass: BlogView [
 
     composeCommentForPost: aPost [
         | postComponent comment |
+        "TODO: Refactor"
         postComponent := BlogPostComponent for: aPost view: self.
         tape show: postComponent.
         comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
         comment ifNotNil: [aPost comment: comment.
+                           section storage commit: aPost]
+    ]
+
+    replyOn: aComment of: aPost [
+        | postComponent comment |
+        "TODO: Refactor"
+        postComponent := BlogPostComponent for: aPost view: self.
+        tape show: postComponent.
+        comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
+        comment ifNotNil: [comment replyOn: aComment.
+                           aPost comment: comment.
                            section storage commit: aPost]
     ]
 

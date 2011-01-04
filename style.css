@@ -197,6 +197,11 @@ td {
     margin: 10px;
 }
 
+.comment-action {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
 .comment-actions {
     margin-top: 5px;
     font-size: 80%;

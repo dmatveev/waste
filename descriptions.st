@@ -150,7 +150,7 @@ AuthInfo class extend [
 
     descriptionPassword [
         <category: 'magritte'>
-        ^Magritte.MAStringDescription new
+        ^Magritte.MAPasswordDescription new
             accessor: #password;
             label: 'Password';
             priority: 200;

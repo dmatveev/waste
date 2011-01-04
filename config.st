@@ -7,7 +7,7 @@ Eval [
 
     WasteConf
         init;
-        proto: #http host: '192.168.1.113' port: 8080.
+        proto: #http host: 'localhost' port: 8080.
 
     owner := WasteAccount
              auth: (AuthInfo login: 'root' password: 'waste')

@@ -233,6 +233,11 @@ Seaside.WAComponent subclass: BlogPostComponent [
         view := aView.
         tape := BlogCommentTape for: post view: view.
     ]
+
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: post title, ' - ', WasteConf siteName
+    ]
     
     renderContentOn: html [
         "TODO: Reusable Back to posts"
@@ -280,6 +285,11 @@ Seaside.WAComponent subclass: BlogTape [
                            render]]
     ]
 
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: 'Posts in the', view section name, ' - ', WasteConf siteName
+    ]
+
     items [
         <category: 'private'>
         ^view section storage posts
@@ -306,6 +316,12 @@ BlogTape subclass: FilteredBlogTape [
         <category: 'private'>
         filterBlock := aFilterBlock
     ]
+
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: view section name, ' search results - ', WasteConf siteName
+    ]
+
 
     items [
         <category: 'private'>
@@ -431,6 +447,11 @@ Seaside.WAComponent subclass: MaintenanceTools [
         self answer: nil.
     ]
 
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: 'Maintenance - ', WasteConf siteName
+    ]
+
     renderContentOn: html [
         html anchor
             callback: [self reloadConfig];
@@ -489,6 +510,11 @@ SectionView subclass: LoginView [
         html anchor
             callback: [self go];
             with: 'Login'
+    ]
+
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: 'Login - ', WasteConf siteName
     ]
 ]
 
@@ -596,7 +622,14 @@ SectionView subclass: BlogView [
     ]
 ]
 
-SectionView subclass: MarkdownView [
+SectionView subclass: StaticView [
+    updateRoot: anHtmlRoot [
+        super updateRoot: anHtmlRoot.
+        anHtmlRoot title: section name, ' - ', WasteConf siteName
+    ]
+]
+
+StaticView subclass: MarkdownView [
     renderContentOn: html [
         <category: 'rendering'>
         html div
@@ -605,7 +638,7 @@ SectionView subclass: MarkdownView [
     ]
 ]
 
-SectionView subclass: HTMLView [
+StaticView subclass: HTMLView [
     renderContentOn: html [
         <category: 'rendering'>
         html div

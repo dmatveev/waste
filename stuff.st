@@ -71,6 +71,15 @@ Object subclass: WasteConf [
     header         := 'TODO: Write your header here!'.
     subheader      := 'TODO: Write your subheader here!'.
     footer         := 'TODO: Write your footer here!'.
+    siteName       := 'TODO: Your site name'.
+
+    WasteConf class >> siteName: aString [
+        siteName := aString
+    ]
+
+    WasteConf class >> siteName [
+        ^siteName
+    ]
 
     WasteConf class >> header: aString [
         header := aString

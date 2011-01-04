@@ -70,7 +70,7 @@ ContentEntityRenderer subclass: BlogPostRenderer [
     renderTitle [
         <category: 'rendering-private'>
         html anchor
-            url: '?section=', view section alias asString, '&id=', entity id asString;
+            url: view section alias asString, '?id=', entity id asString;
             class: 'post-title';
             with: [html div
                        class: 'post-title';
@@ -83,8 +83,8 @@ ContentEntityRenderer subclass: BlogPostRenderer [
             class: 'post-timestamp';
             with: [html text: 'Posted on'; space.
                    html anchor
-                       url: '?section=', view section alias asString,
-                            '&date=', entity dated printString;
+                       url: view section alias asString,
+                            '?date=', entity dated printString;
                        with: [html text: entity dated printString].
                    html
                        space;
@@ -112,14 +112,14 @@ ContentEntityRenderer subclass: BlogPostRenderer [
 
                 "TODO: introduce a Reusable tag component"
                 html anchor
-                    url: '?section=', view section alias asString, '&tag=', firstTag;
+                    url: view section alias asString, '?tag=', firstTag;
                     with: [html text: firstTag].
 
                 otherTags do:
                     [:each |
                     html text: ','; space.
                     html anchor
-                        url: '?section=', view section alias asString, '&tag=', each;
+                        url: view section alias asString, '?tag=', each;
                         with: [html text: each]]]
     ]
 
@@ -242,7 +242,7 @@ Seaside.WAComponent subclass: BlogPostComponent [
     renderContentOn: html [
         "TODO: Reusable Back to posts"
         html anchor
-            url: '?section=', view section alias asString;
+            url: view section alias asString;
             with: [html text: 'Back to posts'].
         (BlogPostRenderer for: post in: view on: html) render.
         html render: tape
@@ -308,7 +308,7 @@ BlogTape subclass: FilteredBlogTape [
         "TODO: introduce a Decorator?"
         "TODO: Reusable 'Back to posts' component"
         html anchor
-            url: '?section=', view section alias asString;
+            url: view section alias asString;
             with: [html text: 'Back to posts'].
     ]
 
@@ -365,7 +365,7 @@ Seaside.WAComponent subclass: BlogCloud [
             with: [(Cloud tags: view section storage) keysAndValuesDo:
                     [:eachKey :eachValue |
                     html anchor
-                        url: '?section=', view section alias asString, '&tag=', eachKey;
+                        url: view section alias asString, '?tag=', eachKey;
                         with: [html text: eachKey].
                     html space; text: ('(', (eachValue asString), ')'); break]]
     ]
@@ -383,10 +383,14 @@ Seaside.WAComponent subclass: BlogSections [
     initialRequest: aRequest [
         <category: 'seaside'>
         super initialRequest: aRequest.
-        aRequest at: 'section' ifPresent:
-           [:section || sec |
-            sec := WasteConf sections detect: [:e | e alias = section asSymbol].
-            sec ifNotNil: [selected := sec]].
+        ((aRequest includesKey: '_s') and: [aRequest includesKey: '_k']) ifFalse:
+            [| rcvr path sec |
+            path := aRequest url allButFirst tokenize: '/'.
+            path isEmpty
+                ifFalse: [rcvr := path first.
+                          sec := WasteConf sections detect:
+                          [:e | e alias = rcvr asSymbol].
+                          sec ifNotNil: [selected := sec]]]
     ]
 
     renderSection: aSection on: html [
@@ -396,7 +400,7 @@ Seaside.WAComponent subclass: BlogSections [
                         class: 'section-active';
                         with: [html text: aSection name]]
             ifFalse: [html anchor
-                        url: '?section=', aSection alias asString;
+                        url: aSection alias asString;
                         class: 'section';
                         with: [html text: aSection name]]
     ]
@@ -416,11 +420,6 @@ Seaside.WAComponent subclass: SectionView [
 
     section [
         ^section
-    ]
-
-    go [
-        "Some sections need to trigger some Smalltalk code when they are opened,
-         thats why I am here"
     ]
 ]
 
@@ -686,11 +685,15 @@ Seaside.WAComponent subclass: BlogApplication [
     initialRequest: aRequest [
         <category: 'seaside'>
         super initialRequest: aRequest.
-        aRequest at: 'section' ifPresent:
-           [:section || sec |
-            sec := WasteConf sections detect: [:e | e alias = section asSymbol].
-            sec ifNotNil: [self open: sec]].
-        aRequest at: 'section' ifAbsent: [self open: WasteConf defaultSection]
+        ((aRequest includesKey: '_s') and: [aRequest includesKey: '_k']) ifFalse:
+            [| rcvr path sec |
+            path := aRequest url allButFirst tokenize: '/'.
+            path isEmpty
+                ifTrue: [self open: WasteConf defaultSection]
+                ifFalse: [rcvr := path first.
+                          sec := WasteConf sections detect:
+                          [:e | e alias = rcvr asSymbol].
+                          sec ifNotNil: [self open: sec]]]
     ]
 
     renderContentOn: html [

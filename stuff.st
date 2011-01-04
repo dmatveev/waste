@@ -64,6 +64,8 @@ BlogStyleStorage subclass: BlogFileStyleStorage [
 Object subclass: WasteConf [
     app            := nil.
     style          := nil.
+    users          := OrderedCollection new.
+    defaultUser    := nil.
     sections       := OrderedCollection new.
     defaultSection := nil.
     header         := 'TODO: Write your header here!'.
@@ -80,6 +82,18 @@ Object subclass: WasteConf [
     
     WasteConf class >> footer: aString [
         footer := aString
+    ]
+
+    WasteConf class >> users [
+        ^users
+    ]
+
+    WasteConf class >> defaultUser: aUser [
+        defaultUser := aUser
+    ]
+
+    WasteConf class >> defaultUser [
+        ^defaultUser
     ]
 
     WasteConf class >> header [
@@ -126,7 +140,10 @@ Object subclass: WasteConf [
 
         Seaside.WADispatcher default
             setName: '';
-            defaultName: 'waste'
+            defaultName: 'waste'.
+
+        sections empty.
+        users empty.
     ]
     
     WasteConf class >> proto: aSymbol host: aHost port: anInteger [

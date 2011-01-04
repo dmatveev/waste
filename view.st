@@ -128,18 +128,20 @@ ContentEntityRenderer subclass: BlogPostRenderer [
         html div
             class: 'post-actions';
             with:
-                [html anchor
+                [(view session user permissions includes: #canComment) ifTrue:
+                 [html anchor
                      callback: [view composeCommentForPost: entity];
                      class: 'post-action';
-                     with: [html text: 'Add a comment'].
-                 html anchor
+                     with: [html text: 'Add a comment']].
+                 (view session user permissions includes: #canModerate) ifTrue:
+                 [html anchor
                      callback: [view edit: entity];
                      class: 'post-action';
                      with: [html text: 'Edit'].
-                 html anchor
+                  html anchor
                      callback: [view remove: entity];
                      class: 'post-action';
-                     with: [html text: 'Remove']].
+                     with: [html text: 'Remove']]].
     ]
 ]
 
@@ -180,10 +182,11 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
         <category: 'rendering-private'>
         html div
             class: 'comment-actions';
-            with: [html anchor
+            with: [(view session user permissions includes: #canModerate) ifTrue:
+                   [html anchor
                      callback: [view remove: entity of: post];
                      class: 'comment-action';
-                     with: [html text: 'Remove']]
+                     with: [html text: 'Remove']]]
     ]
     renderMessages [
         <category: 'overriding'>
@@ -261,9 +264,10 @@ Seaside.WAComponent subclass: BlogTape [
     renderActionsOn: html [
         <category: 'rendering-private'>
         "TODO: introduce a Decorator?"
-        html anchor
+        (view session user permissions includes: #canPost) ifTrue:
+        [html anchor
             callback: [view compose];
-            with: [html text: 'Add a post'].
+            with: [html text: 'Add a post']].
     ]
 
     renderContentOn: html [
@@ -318,7 +322,7 @@ Seaside.WAComponent subclass: BlogHeader [
 
         html div
             class: 'subheader';
-            with: [html text: WasteConf subheader]
+            with: [html text: WasteConf subheader].
     ]
 ]
 
@@ -396,6 +400,95 @@ Seaside.WAComponent subclass: SectionView [
 
     section [
         ^section
+    ]
+
+    go [
+        "Some sections need to trigger some Smalltalk code when they are opened,
+         thats why I am here"
+    ]
+]
+
+Seaside.WAComponent subclass: MaintenanceTools [
+    reloadPackage [
+        | base |
+        base := PackageLoader directoryFor: #Waste.
+        (PackageLoader fileInsFor: #Waste) do:
+            [:e | FileStream fileIn: (base / e) file name].
+        self reloadConfig
+    ]
+
+    reloadConfig [
+        FileStream fileIn: 'config.st'
+    ]
+
+    logout [
+        self session user: nil.
+        self session respond: 
+            [:url || response |
+             response := self session redirectResponseFor: url.
+             response deleteCookieAt: 'sessionid'.
+             response].
+        self answer: nil.
+    ]
+
+    renderContentOn: html [
+        html anchor
+            callback: [self reloadConfig];
+            with: 'Reload configuration'.
+        html break.
+
+        html anchor
+            callback: [self reloadPackage];
+            with: 'Reload package'.
+        html break.
+
+        html anchor
+            callback: [self logout];
+            with: 'Logout'
+    ]
+]
+
+SectionView subclass: LoginView [
+    LoginView class >> alias: anAlias [
+        ^self name: nil alias: anAlias
+    ]
+
+    initialize [
+        super initialize.
+        self session loggedIn ifTrue: [self show: MaintenanceTools new]
+    ]
+
+    go [
+        | auth |
+        auth := self call: AuthInfo new asComponent addValidatedForm.
+        auth ifNotNil:
+            [| user |
+            user := [WasteConf users detect: [:e | e auth = auth]]
+                    ifError: [nil].
+            user ifNotNil: [self login: user]]
+    ]
+
+    login: user [
+        | cookie login pass |
+        login  := user auth login.
+        pass   := user auth password.
+        cookie := WACookie
+                  key: 'sessionid'
+                  value: login, ':', (MD5 new: pass) hexDigest.
+
+        self session respond:
+            [:url || response |
+            response := self session redirectResponseFor: url.
+            response addCookie: cookie.
+            response].
+
+        self show: MaintenanceTools new
+    ]
+
+    renderContentOn: html [
+        html anchor
+            callback: [self go];
+            with: 'Login'
     ]
 ]
 
@@ -537,13 +630,18 @@ Seaside.WAComponent subclass: BlogApplication [
         header   := BlogHeader new.
         footer   := BlogFooter new.
         sections := BlogSections new.
+        body     := Seaside.WAComponent new.
         self open: WasteConf defaultSection
     ]
 
     open: aSection [
         | view |
         view := aSection view.
-        body ifNil: [body := view] ifNotNil: [body show: view]
+        body show: view.
+    ]
+
+    login [
+        body call: AuthInfo new asComponent addValidatedForm
     ]
 
     updateRoot: anHtmlRoot [

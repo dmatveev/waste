@@ -3,11 +3,20 @@
 " ------------------------------------------------------------------------------- "
 
 Eval [
-    | blog stat |
+    | owner anon blog stat login |
 
     WasteConf
         init;
-        proto: #http host: 'localhost' port: 8080.
+        proto: #http host: '192.168.1.113' port: 8080.
+
+    owner := WasteAccount
+             auth: (AuthInfo login: 'root' password: 'waste')
+             rights: #(#canPost #canComment #canModerate).
+
+    anon := AnonymousAccount new permissions: #(#canComment).
+
+    WasteConf users add: owner.
+    WasteConf defaultUser: anon.
 
     blog := BlogSection
             name: 'Blog'
@@ -19,7 +28,11 @@ Eval [
             alias: #staticDemo.
     stat text: 'chop'.
 
-    WasteConf sections empty; addAll: {blog. stat}.
+    login := LoginSection
+             name: 'Maintenance'
+             alias: #maintenance.
+
+    WasteConf sections addAll: {blog. stat. login}.
     WasteConf defaultSection: blog.
 
     WasteConf style: (BlogLibraryStyleStorage

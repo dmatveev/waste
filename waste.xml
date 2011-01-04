@@ -2,13 +2,13 @@
   <name>Waste</name>
 
   <prereq>Seaside</prereq>
-  <prereq>Seaside-Development</prereq>
-  <prereq>Seaside-Examples</prereq>
   <prereq>Magritte-Seaside</prereq>
   <prereq>I18N</prereq>
   <prereq>PetitParser</prereq>
+  <prereq>Digest</prereq>
   
   <filein>model.st</filein>
+  <filein>accounts.st</filein>
   <filein>descriptions.st</filein>
   <filein>view.st</filein>
   <filein>stuff.st</filein>
@@ -18,6 +18,7 @@
   <filein>mem-storage.st</filein>
 
   <file>model.st</file>
+  <file>accounts.st</file>
   <file>descriptions.st</file>
   <file>view.st</file>
   <file>stuff.st</file>

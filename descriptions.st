@@ -103,7 +103,7 @@ BlogComment class extend [
         ^Magritte.MAMemoDescription new
             accessor: #text;
             label: 'Text';
-            priority: 200;
+            priority: 300;
             addCondition: [:value | value isEmpty not];
             beRequired;
             yourself
@@ -133,5 +133,27 @@ BlogComment extend [
 
     email [
         ^email
+    ]
+]
+
+AuthInfo class extend [
+    descriptionLogin [
+        <category: 'magritte'>
+        ^Magritte.MAStringDescription new
+            accessor: #login;
+            label: 'Login';
+            priority: 100;
+            addCondition: [:value | value isEmpty not];
+            beRequired;
+            yourself
+    ]
+
+    descriptionPassword [
+        <category: 'magritte'>
+        ^Magritte.MAStringDescription new
+            accessor: #password;
+            label: 'Password';
+            priority: 200;
+            yourself
     ]
 ]

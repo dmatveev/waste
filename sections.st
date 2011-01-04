@@ -39,6 +39,13 @@ Object subclass: Section [
     ]
 ]
 
+Section subclass: LoginSection [
+    view [
+        <category: 'accessing'>
+        ^LoginView new section: self
+    ]
+]
+
 Section subclass: BlogSection [
     view [
         <category: 'accessing'>

@@ -345,9 +345,10 @@ Seaside.WAComponent subclass: BlogHeader [
             class: 'header';
             with: [html text: WasteConf header].
 
-        html div
+        WasteConf subheader isEmpty ifFalse:
+        [html div
             class: 'subheader';
-            with: [html text: WasteConf subheader].
+            with: [html text: WasteConf subheader]].
     ]
 ]
 

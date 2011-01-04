@@ -296,7 +296,7 @@ Seaside.WAComponent subclass: BlogTape [
 
     updateRoot: anHtmlRoot [
         super updateRoot: anHtmlRoot.
-        anHtmlRoot title: 'Posts in the', view section name, ' - ', WasteConf siteName
+        anHtmlRoot title: 'Posts in the ', view section name, ' - ', WasteConf siteName
     ]
 
     items [

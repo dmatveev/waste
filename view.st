@@ -400,12 +400,17 @@ Seaside.WAComponent subclass: BlogCloud [
         <catogory: 'rendering'>
         html div 
             class: 'cloud';
-            with: [(Cloud tags: view section storage) keysAndValuesDo:
-                    [:eachKey :eachValue |
-                    html anchor
-                        url: view section alias asString, '?tag=', eachKey;
-                        with: [html text: eachKey].
-                    html space; text: ('(', (eachValue asString), ')'); break]]
+            with: [| tags |
+                   tags := (Cloud tags: view section storage) associations
+                           asSortedCollection: [:a :b | a value > b value].
+                   tags do: [:each || eachKey eachVal |
+                             eachKey := each key.
+                             eachVal := each value.
+                             
+                             html anchor
+                                 url: view section alias asString, '?tag=', eachKey;
+                                 with: [html text: eachKey].
+                             html space; text: ('(', (eachVal asString), ')'); break]]
     ]
 ]
 

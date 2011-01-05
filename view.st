@@ -267,6 +267,13 @@ Seaside.WAComponent subclass: BlogPostComponent [
         super updateRoot: anHtmlRoot.
         anHtmlRoot title: post title, ' - ', WasteConf siteName
     ]
+
+    updateUrl: anUrl [
+        <category: 'seaside'>
+        super updateUrl: anUrl.
+        anUrl addToPath: view section alias asString.
+        anUrl addParameter: 'id' value: post id asString.
+    ]
     
     renderContentOn: html [
         "TODO: Reusable Back to posts"
@@ -573,7 +580,6 @@ SectionView subclass: BlogView [
         tape show: postComponent.
         comment := postComponent tape call: (self session user newComment
                                                   asComponent addValidatedForm).
-        comment printNl.
         comment ifNotNil: [aPost comment: comment.
                            section storage commit: aPost]
     ]
@@ -585,7 +591,6 @@ SectionView subclass: BlogView [
         tape show: postComponent.
         comment := postComponent tape call: (self session user newComment
                                                   asComponent addValidatedForm).
-        comment printNl.
         comment ifNotNil: [comment replyOn: aComment.
                            aPost comment: comment.
                            section storage commit: aPost]

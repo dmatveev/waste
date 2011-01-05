@@ -34,6 +34,7 @@ BlogPost class extend [
             accessor: #tags;
             label: 'Tags';
             priority: 300;
+            beRequired;
             yourself
     ]
 ]
@@ -75,7 +76,18 @@ BlogPost extend [
     ]
 ]
 
-
+BasicComment class extend [
+    descriptionText [
+        <category: 'magritte'>
+        ^Magritte.MAMemoDescription new
+            accessor: #text;
+            label: 'Text';
+            priority: 300;
+            addCondition: [:value | value isEmpty not];
+            beRequired;
+            yourself
+    ]
+]
 
 BlogComment class extend [
     descriptionName [
@@ -97,20 +109,9 @@ BlogComment class extend [
             priority: 200;
             yourself
     ]
-    
-    descriptionText [
-        <category: 'magritte'>
-        ^Magritte.MAMemoDescription new
-            accessor: #text;
-            label: 'Text';
-            priority: 300;
-            addCondition: [:value | value isEmpty not];
-            beRequired;
-            yourself
-    ]
 ]
 
-BlogComment extend [
+BasicComment extend [
     text: aString [
         text := aString
     ]
@@ -118,7 +119,9 @@ BlogComment extend [
     text [
         ^text
     ]
+]
 
+BlogComment extend [
     name: aString [
         name := aString
     ]

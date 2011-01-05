@@ -55,15 +55,52 @@ ContentEntity subclass: BlogPost [
     ]
 ]
 
-ContentEntity subclass: BlogComment [
-    | name email text replyOn |
-
+ContentEntity subclass: BasicComment [
+    | text replyOn |
+    
     replyOn: aComment [
         replyOn := aComment
     ]
 
     replyOn [
         ^replyOn
+    ]
+]
+
+BasicComment subclass: BlogComment [
+    | name email |
+    
+    accept: aRenderer [
+        <category: 'visiting'>
+        aRenderer visitBlogComment
+    ]
+]
+
+BasicComment subclass: AuthorComment [
+    | author |
+
+    AuthorComment class >> author: anUser [
+        ^self new
+            author: anUser;
+            yourself
+    ]
+
+    name [
+        "Yet another kludge. See BlogCommentRenderer for details"
+        ^author name
+    ]
+
+    author: aUser [
+        author := aUser
+    ]
+
+    author [
+        ^author
+    ]
+
+    accept: aRenderer [
+        <category: 'visiting'>
+        aRenderer visitAuthorComment
     ]
 ]
 

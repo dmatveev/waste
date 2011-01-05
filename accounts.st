@@ -59,6 +59,30 @@ Object subclass: WasteAccount [
     permissions [
         ^permissions
     ]
+
+    newPost [
+        ^BlogPost new
+    ]
+
+    newComment [
+        ^BlogComment new
+    ]
+]
+
+WasteAccount subclass: OwnerAccount [
+    | name |
+
+    name [
+        ^name
+    ]
+
+    name: aString [
+        name := aString
+    ]
+
+    newComment [
+        ^AuthorComment author: self
+    ]
 ]
 
 WasteAccount subclass: AnonymousAccount [

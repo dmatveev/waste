@@ -40,9 +40,15 @@ Object subclass: ContentEntityRenderer [
 
     render [
         <category: 'rendering'>
+        "Default implementation"
+        self render: self renderMessages class: self containerClass
+    ]
+
+    render: anArray class: aString [
+        <category: 'rendering'>
         html div
-            class: self containerClass;
-            with: [self renderMessages do: [:e | self perform: e]]
+            class: aString;
+            with: [anArray do: [:e | self perform: e]]
     ]
 
     renderMessages [
@@ -160,19 +166,28 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
         post := aPost
     ]
 
-    renderTitle [
+    renderBasicTitle: aUsernameBlock [
         <category: 'rendering-private'>
         html div
             class: 'comment-header';
-            with: [html anchor
-                       url: 'mailto:', entity email;
-                       with: [html text: entity name].
+            with: [aUsernameBlock value: html.
                    html text: ' commented on ', entity dated printString, ' at ',
                               entity timestamp asTime printString.
                    entity replyOn ifNotNil:
                    [html text: ' in reply to ', entity replyOn name,
                                ' (', entity replyOn dated printString, ' ',
                                      entity replyOn timestamp asTime printString, ')']]
+    ]
+
+    renderTitle [
+        <category: 'rendering-private'>
+        self renderBasicTitle: [:h | h anchor url: 'mailto:', entity email;
+                                              with: [h text: entity name]]
+    ]
+
+    renderAuthorTitle [
+        <category: 'rendering-private'>
+        self renderBasicTitle: [:h | h strong: [html text: entity author name]]
     ]
 
     renderText [
@@ -197,14 +212,19 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
                      class: 'comment-action';
                      with: [html text: 'Remove']]]
     ]
-    renderMessages [
-        <category: 'overriding'>
-        ^#(#renderTitle #renderText #renderActions)
+
+    render [
+        entity accept: self
     ]
 
-    containerClass [
-        <category: 'overriding'>
-        ^'comment'
+    visitBlogComment [
+        self render: #(#renderTitle #renderText #renderActions)
+             class: 'comment'
+    ]
+
+    visitAuthorComment [
+        self render: #(#renderAuthorTitle #renderText #renderActions)
+             class: 'author-comment'
     ]
 ]
 
@@ -287,11 +307,13 @@ Seaside.WAComponent subclass: BlogTape [
     renderContentOn: html [
         <category: 'rendering'>
         self renderActionsOn: html.
-        html div
-            class: 'tape';
-            with: [self items do:
-                  [:each | (BlogPostRenderer for: each in: view on: html)
-                           render]]
+        html div class: 'tape'; with:
+            [self items isEmpty
+                ifTrue: [html text: 'No posts in this blog']
+                ifFalse: [self items do:
+                             [:each |
+                             (BlogPostRenderer for: each in: view on: html)
+                                 render]]]
     ]
 
     updateRoot: anHtmlRoot [
@@ -330,7 +352,6 @@ BlogTape subclass: FilteredBlogTape [
         super updateRoot: anHtmlRoot.
         anHtmlRoot title: view section name, ' search results - ', WasteConf siteName
     ]
-
 
     items [
         <category: 'private'>
@@ -550,7 +571,9 @@ SectionView subclass: BlogView [
         "TODO: Refactor"
         postComponent := BlogPostComponent for: aPost view: self.
         tape show: postComponent.
-        comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
+        comment := postComponent tape call: (self session user newComment
+                                                  asComponent addValidatedForm).
+        comment printNl.
         comment ifNotNil: [aPost comment: comment.
                            section storage commit: aPost]
     ]
@@ -560,7 +583,9 @@ SectionView subclass: BlogView [
         "TODO: Refactor"
         postComponent := BlogPostComponent for: aPost view: self.
         tape show: postComponent.
-        comment := postComponent tape call: (BlogComment new asComponent addValidatedForm).
+        comment := postComponent tape call: (self session user newComment
+                                                  asComponent addValidatedForm).
+        comment printNl.
         comment ifNotNil: [comment replyOn: aComment.
                            aPost comment: comment.
                            section storage commit: aPost]

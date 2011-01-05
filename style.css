@@ -53,16 +53,14 @@ td {
     padding-top: 5px;
     padding-left: 15px;
     padding-right: 15px;
-    padding-bottom: 2px;
 }
 
 .subheader {
     font-size: 100%;
 
-    padding-top: 5px;
     padding-left: 15px;
     padding-right: 15px;
-    padding-bottom: 2px;
+    padding-bottom: 5px;
 }
 
 .footer {
@@ -82,6 +80,7 @@ td {
 }
 
 .tape {
+    margin-top: 10px;
 }
 
 .cloud {
@@ -178,11 +177,14 @@ td {
 
 /* Comment */
 
-.comment {
-    margin-top: 2px;
-    padding-left: 2px;
-    margin-bottom: 20px;
+.comment, .author-comment {
+    margin-bottom: 13px;
+    padding: 3px;
     width: 100%;
+}
+
+.author-comment {
+    background-color: #eeeeee;
 }
 
 .comment-header {

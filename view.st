@@ -75,10 +75,10 @@ ContentEntityRenderer subclass: BlogPostRenderer [
 
     renderTitle [
         <category: 'rendering-private'>
-        html anchor
-            url: view section alias asString, '?id=', entity id asString;
+        html div
             class: 'post-title';
-            with: [html div
+            with: [html anchor
+                       url: view section alias asString, '?id=', entity id asString;
                        class: 'post-title';
                        with: [html text: entity title]]
     ]

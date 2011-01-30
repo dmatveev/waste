@@ -1,15 +1,16 @@
 Object subclass: MarkdownRenderer [
-    | text html |
+    | text html parser |
 
-    MarkdownRenderer class >> text: aString on: aCanvas [
+    MarkdownRenderer class >> parser: aParser text: aString on: aCanvas [
         <category: 'instance creation'>
-        ^self new text: aString on: aCanvas
+        ^self new parser: aParser text: aString on: aCanvas
     ]
 
-    text: aString on: aCanvas [
+    parser: aParser text: aString on: aCanvas [
         <category: 'private'>
         text := aString.
-        html := aCanvas
+        html := aCanvas.
+        parser := aParser
     ]
 
     render [
@@ -17,7 +18,7 @@ Object subclass: MarkdownRenderer [
         txt := (text last = Character nl)
                 ifTrue:  [text]
                 ifFalse: [text, Character nl asString].
-        ast := WTParser parse: txt.
+        ast := parser parse: txt.
         mdb := MarkdownBuilder on: html.
         ast do: [:each | each accept: mdb]
     ]
@@ -102,7 +103,7 @@ ContentEntityRenderer subclass: BlogPostRenderer [
         <category: 'rendering-private'>
         html div
             class: 'post-content';
-            with: [(MarkdownRenderer text: entity text on: html) render]
+            with: [(MarkdownRenderer parser: WTParser text: entity text on: html) render]
     ]
 
     renderTags [
@@ -194,7 +195,7 @@ ContentEntityRenderer subclass: BlogCommentRenderer [
         <category: 'rendering-private'>
         html div
             class: 'comment-content';
-            with: [(MarkdownRenderer text: entity text on: html) render]
+            with: [(MarkdownRenderer parser: MarkdownParser text: entity text on: html) render]
     ]
 
     renderActions [

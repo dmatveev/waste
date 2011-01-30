@@ -17,7 +17,7 @@ Object subclass: MarkdownRenderer [
         txt := (text last = Character nl)
                 ifTrue:  [text]
                 ifFalse: [text, Character nl asString].
-        ast := MarkdownParser parse: txt.
+        ast := WTParser parse: txt.
         mdb := MarkdownBuilder on: html.
         ast do: [:each | each accept: mdb]
     ]

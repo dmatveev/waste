@@ -65,7 +65,7 @@ Object subclass: MarkdownBuilder [
     visitParagraphNode: aNode [
         html paragraph
             class: '';
-            with: [aNode subnodes do: [:each | each accept: self. html text: ' ']]
+            with: [aNode subnodes do: [:each | each accept: self]]
     ]
 
     visitPlainNode: aNode [
@@ -77,5 +77,63 @@ Object subclass: MarkdownBuilder [
             url: aNode text;
             with: aNode text;
             class: ''
+    ]
+
+    visitListNode: aNode [
+        | brush |
+        brush := html perform: (aNode numeric ifTrue:  [#orderedList ]
+                                              ifFalse: [#unorderedList ]).
+        brush
+            class: '';
+            with: [aNode subnodes do: [:each | each accept: self]]
+    ]
+
+    visitItemNode: aNode [
+        html html: '<li>'
+    ]
+
+    visitHeaderNode: aNode [
+        html heading
+            class: '';
+            level: aNode level;
+            with: aNode text
+    ]
+
+    visitBoldNode: aNode [
+        "I have not found 'bold' message for html :D"
+        html html: '<b>'; text: aNode text; html: '</b>'
+    ]
+
+    visitItalicNode: aNode [
+        "I have not found 'italic' message for html :D"
+        html html: '<i>'; text: aNode text; html: '</i>'
+    ]
+
+    visitPreformattedNode: aNode [
+        html preformatted
+            class: '';
+            with: aNode text
+    ]
+
+    visitCodeNode: aNode [
+        html code
+            class: '';
+            with: aNode text
+    ]
+
+    visitImageNode: aNode [
+        html image
+            class: '';
+            url: aNode url
+    ]
+
+    visitCaptionNode: aNode [
+        html div
+            class: '';
+            with: aNode text
+    ]
+
+    visitRawNode: aNode [
+        html html: aNode text
     ]
 ]

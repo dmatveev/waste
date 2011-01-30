@@ -1,16 +1,18 @@
-Eval [
-    PackageLoader fileInPackage: #PetitParser.
-    FileStream fileIn: 'parse-nodes.st'.
-]
-
 Object extend [
     isWTCommandToken [
         <category: '*waste-testing'>
+        "This is a kludge, I do not like it"
         ^false
     ]
 ]
 
 Object subclass: WTToken [
+]
+
+WTToken subclass: WTNewlineToken [
+    WTNewlineToken class >> inline [
+        ^false
+    ]
 ]
 
 WTToken subclass: WTCommandToken [
@@ -44,6 +46,10 @@ WTToken subclass: WTCommandToken [
     arguments [
         <category: 'accessors'>
         ^arguments
+    ]
+
+    inline [
+        ^false
     ]
 
     command: aString arguments: anotherString [
@@ -136,6 +142,39 @@ Object subclass: WTBlockBuilder [
     ]
 ]
 
+Object subclass: WTParagraphBuilder [
+    | result cache |
+
+    WTParagraphBuilder class >> on: tokens [
+        <category: 'instance creation'>
+        ^(self new) init; optimize: tokens
+    ]
+
+    init [
+        <category: 'initialization'>
+        result := OrderedCollection new.
+        cache := OrderedCollection new.
+    ]
+
+    flushCache [
+        <category: 'private'>
+        cache isEmpty ifFalse: [result add: (ParagraphNode with: cache)]
+    ]
+
+    optimize: tokens [
+        <category: 'optimizing'>
+        tokens do:
+            [:e |
+            e inline ifTrue:  [cache add: e]
+                     ifFalse: [self flushCache.
+                               "The following line is BAD PRACTICE!"
+                               e = WTNewlineToken ifFalse: [result add: e].
+                               cache empty]].
+        self flushCache.
+        ^result
+    ]
+]
+
 Object subclass: WTContentOptimizer [
     WTContentOptimizer class >> on: tokens [
         <category: 'instance creation'>
@@ -176,46 +215,49 @@ Object subclass: WTParser [
             => [:t | self nodeForCommand: t second arguments: t third]
     ]
 
+    WTParser class >> linebreak [
+        ^Character nl asParser, Character cr asParser optional
+    ]
+
     WTParser class >> newline [
         <category: 'parsers'>
-        ^Character nl asParser, Character nl asParser plus
-            => [:t | nil]
+        ^self linebreak, self linebreak plus
+            => [:t | WTNewlineToken]
+    ]
+
+    WTParser class >> verbatim [
+        | end inside |
+        end := '\end{verbatim}' asParser.
+        inside := end not, #any asParser.
+        ^'\begin{verbatim}' asParser, inside star flatten, end
+            => [:t | PreformattedNode text: t second]
     ]
 
     WTParser class >> content [
         <category: 'parsers'>
-        ^(self command / self newline negate) star
+        ^(self verbatim / self command / self newline negate / self newline) star
             => [:t || nodes |
                 nodes := WTContentOptimizer on: t.
                 nodes]
-    ]
-
-    WTParser class >> paragraph [
-        <category: 'parsers'>
-        ^(self content delimitedBy: self newline)
-            => [:t | self buildParagraphs: t]
-    ]
-
-    WTParser class >> buildParagraphs: anArray [
-        <category: 'private'>
-        | s r |
-        r := OrderedCollection new.
-        s := ReadStream on: anArray.
-        [s atEnd] whileFalse: [r add: (ParagraphNode with: (s upTo: nil))].
-        r
     ]
 
     WTParser class >> setupCommands [
         <category: 'private'>
         commands := Dictionary new.
         commands
-            at: 'section'       put: [:arg | HeaderNode text: arg level: 1];
-            at: 'subsection'    put: [:arg | HeaderNode text: arg level: 2];
-            at: 'subsubsection' put: [:arg | HeaderNode text: arg level: 3];
-            at: 'itemize'       put: [:arg | ItemListNode numeric: false subnodes: arg];
-            at: 'enumerate'     put: [:arg | ItemListNode numeric: true  subnodes: arg];
-            at: 'url'           put: [:arg | URLNode text: arg];
-            at: 'item'          put: [:arg | ItemNode new]
+            at: 'section'         put: [:arg | HeaderNode text: arg level: 1];
+            at: 'subsection'      put: [:arg | HeaderNode text: arg level: 2];
+            at: 'subsubsection'   put: [:arg | HeaderNode text: arg level: 3];
+            at: 'enumerate'       put: [:arg | ListNode numeric: true  subnodes: arg];
+            at: 'itemize'         put: [:arg | ListNode numeric: false subnodes: arg];
+            at: 'item'            put: [:arg | ItemNode new];
+            at: 'textbf'          put: [:arg | BoldNode text: arg];
+            at: 'textit'          put: [:arg | ItalicNode text: arg];
+            at: 'url'             put: [:arg | URLNode text: arg];
+            at: 'verb'            put: [:arg | CodeNode text: arg];
+            at: 'includegraphics' put: [:arg | ImageNode url: arg];
+            at: 'caption'         put: [:arg | CaptionNode text: arg];
+            at: 'html'            put: [:arg | RawNode text: arg]
     ]
 
     WTParser class >> nodeForCommand: aCommand arguments: args [
@@ -225,5 +267,10 @@ Object subclass: WTParser [
                     at: aCommand
                     ifAbsent: [^WTCommandToken command: aCommand arguments: args].
         ^block value: args
+    ]
+
+    WTParser class >> parse: aString [
+        <category: 'functionality'>
+        ^WTParagraphBuilder on: (WTBlockBuilder on: (self content parse: aString))
     ]
 ]

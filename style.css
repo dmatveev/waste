@@ -16,6 +16,18 @@ input.text {
     font-size: 100%;
 }
 
+h1 {
+    font-size: 130%;
+}
+
+h2 {
+    font-size: 115%;
+}
+
+h3 {
+    font-size: 100%;
+}
+
 p {
     margin-top: 0;
     margin-left: 0;

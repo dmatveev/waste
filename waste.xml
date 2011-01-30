@@ -15,6 +15,7 @@
   <filein>session.st</filein>
   <filein>parse-nodes.st</filein>
   <filein>markdown.st</filein>
+  <filein>wastex.st</filein>
   <filein>sections.st</filein>
   <filein>mem-storage.st</filein>
 
@@ -26,6 +27,7 @@
   <file>session.st</file>
   <file>parse-nodes.st</file>
   <file>markdown.st</file>
+  <file>wastex.st</file>
   <file>sections.st</file>
   <file>mem-storage.st</file>
 </package>

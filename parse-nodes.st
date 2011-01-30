@@ -13,6 +13,10 @@ Object subclass: ParseNode [
         ^false
     ]
 
+    inline [
+        ^false
+    ]
+
     merge: aNode [
     ]
 
@@ -31,10 +35,10 @@ ParseNode subclass: ParagraphNode [
     ]
 ]
 
-ParseNode subclass: ItemListNode [
+ParseNode subclass: ListNode [
     | numeric |
 
-    ItemListNode class >> numeric: aBoolean subnodes: anArray [
+    ListNode class >> numeric: aBoolean subnodes: anArray [
         ^self new
             numeric: aBoolean;
             addSubnodes: anArray;
@@ -43,6 +47,14 @@ ParseNode subclass: ItemListNode [
 
     numeric: aBoolean [
         numeric := aBoolean
+    ]
+
+    numeric [
+        ^numeric
+    ]
+
+    accept: aVisitor [
+        aVisitor visitListNode: self
     ]
 ]
 
@@ -72,6 +84,10 @@ ParseNode subclass: PlainNode [
     accept: aVisitor [
         aVisitor visitPlainNode: self
     ]
+
+    inline [
+        ^true
+    ]
 ]
 
 PlainNode subclass: URLNode [
@@ -81,6 +97,21 @@ PlainNode subclass: URLNode [
 ]
 
 ParseNode subclass: ItemNode [
+    accept: aVisitor [
+        aVisitor visitItemNode: self
+    ]
+]
+
+PlainNode subclass: BoldNode [
+    accept: aVisitor [
+        aVisitor visitBoldNode: self
+    ]
+]
+
+PlainNode subclass: ItalicNode [
+    accept: aVisitor [
+        aVisitor visitItalicNode: self
+    ]
 ]
 
 PlainNode subclass: HeaderNode [
@@ -98,5 +129,61 @@ PlainNode subclass: HeaderNode [
 
     level: anInteger [
         level := anInteger
+    ]
+
+    inline [
+        ^false
+    ]
+
+    accept: aVisitor [
+        aVisitor visitHeaderNode: self
+    ]
+]
+
+PlainNode subclass: PreformattedNode [
+    accept: aVisitor [
+        aVisitor visitPreformattedNode: self
+    ]
+]
+
+PlainNode subclass: CodeNode [
+    accept: aVisitor [
+        aVisitor visitCodeNode: self
+    ]
+]
+
+ParseNode subclass: ImageNode [
+    | url |
+
+    ImageNode class >> url: aString [
+        ^self new url: aString; yourself
+    ]
+
+    url: aString [
+        url := aString
+    ]
+
+    url [
+        ^url
+    ]
+
+    accept: aVisitor [
+        aVisitor visitImageNode: self
+    ]
+]
+
+PlainNode subclass: CaptionNode [
+    accept: aVisitor [
+        aVisitor visitCaptionNode: self
+    ]
+
+    inline [
+        ^false
+    ]
+]
+
+PlainNode subclass: RawNode [
+    accept: aVisitor [
+        aVisitor visitRawNode: self
     ]
 ]

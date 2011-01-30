@@ -78,8 +78,8 @@ ContentEntityRenderer subclass: BlogPostRenderer [
         html div
             class: 'post-title';
             with: [html anchor
+                       class: 'post-title-text';
                        url: view section alias asString, '?id=', entity id asString;
-                       class: 'post-title';
                        with: [html text: entity title]]
     ]
 

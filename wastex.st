@@ -167,7 +167,7 @@ Object subclass: WTParagraphBuilder [
             [:e |
             e inline ifTrue:  [cache add: e]
                      ifFalse: [self flushCache.
-                               "The following line is BAD PRACTICE!"
+                               "The following line is a BAD PRACTICE!"
                                e = WTNewlineToken ifFalse: [result add: e].
                                cache empty]].
         self flushCache.
@@ -251,9 +251,14 @@ Object subclass: WTParser [
             => [:t | CodeNode text: t second]
     ]
 
+    WTParser class >> quote [
+        ^('``' asParser / '''''' asParser)
+            => [:t | $"]
+    ]
+
     WTParser class >> content [
         <category: 'parsers'>
-        ^(self verbatim / self verb / self command /
+        ^(self verbatim / self verb / self command / self quote /
           self newline negate / self newline) star
             => [:t || nodes |
                 nodes := WTContentOptimizer on: t.

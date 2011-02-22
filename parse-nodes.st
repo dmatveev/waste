@@ -91,6 +91,22 @@ ParseNode subclass: PlainNode [
 ]
 
 PlainNode subclass: URLNode [
+    | url |
+    
+    URLNode class >> text: aString url: anotherString [
+        ^(self text: aString)
+            url: anotherString;
+            yourself
+    ]
+
+    url: aString [
+        url := aString
+    ]
+
+    url [
+        ^url
+    ]
+
     accept: aVisitor [
         aVisitor visitURLNode: self
     ]

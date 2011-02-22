@@ -74,8 +74,8 @@ Object subclass: MarkdownBuilder [
 
     visitURLNode: aNode [
         html anchor
-            url: aNode text;
-            with: aNode text;
+            url: aNode url;
+            with: (aNode text ifNil: [aNode url]);
             class: ''
     ]
 

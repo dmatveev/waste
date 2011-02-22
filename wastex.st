@@ -209,10 +209,20 @@ Object subclass: WTParser [
             => [:t | t second]
     ]
 
+    WTParser class >> options [
+        | end inside |
+        end := ']' asParser.
+        inside := end not, #any asParser.
+        ^'[' asParser, inside star flatten, end
+            => [:t | t second]
+    ]
+
     WTParser class >> command [
         <category: 'parsers'>
-        ^self sign, self arguments optional
-            => [:t | self nodeForCommand: t second arguments: t third]
+        ^self sign, self options optional, self arguments optional
+            => [:t | self nodeForCommand: t second
+                          options: t third
+                          arguments: t fourth]
     ]
 
     WTParser class >> linebreak [
@@ -245,32 +255,39 @@ Object subclass: WTParser [
         <category: 'private'>
         commands := Dictionary new.
         commands
-            at: 'section'         put: [:arg | HeaderNode text: arg level: 1];
-            at: 'subsection'      put: [:arg | HeaderNode text: arg level: 2];
-            at: 'subsubsection'   put: [:arg | HeaderNode text: arg level: 3];
-            at: 'enumerate'       put: [:arg | ListNode numeric: true  subnodes: arg];
-            at: 'itemize'         put: [:arg | ListNode numeric: false subnodes: arg];
-            at: 'item'            put: [:arg | ItemNode new];
-            at: 'textbf'          put: [:arg | BoldNode text: arg];
-            at: 'textit'          put: [:arg | ItalicNode text: arg];
-            at: 'url'             put: [:arg | URLNode text: arg];
-            at: 'verb'            put: [:arg | CodeNode text: arg];
-            at: 'includegraphics' put: [:arg | ImageNode url: arg];
-            at: 'caption'         put: [:arg | CaptionNode text: arg];
-            at: 'html'            put: [:arg | RawNode text: arg]
+            at: 'section'         put: [:o :a | HeaderNode text: a level: 1];
+            at: 'subsection'      put: [:o :a | HeaderNode text: a level: 2];
+            at: 'subsubsection'   put: [:o :a | HeaderNode text: a level: 3];
+            at: 'enumerate'       put: [:o :a | ListNode numeric: true  subnodes: a];
+            at: 'itemize'         put: [:o :a | ListNode numeric: false subnodes: a];
+            at: 'item'            put: [:o :a | ItemNode new];
+            at: 'textbf'          put: [:o :a | BoldNode text: a];
+            at: 'textit'          put: [:o :a | ItalicNode text: a];
+            at: 'url'             put: [:o :a | URLNode text: o url: a];
+            at: 'verb'            put: [:o :a | CodeNode text: a];
+            at: 'includegraphics' put: [:o :a | ImageNode url: a];
+            at: 'caption'         put: [:o :a | CaptionNode text: a];
+            at: 'html'            put: [:o :a | RawNode text: a]
     ]
 
-    WTParser class >> nodeForCommand: aCommand arguments: args [
+    WTParser class >> nodeForCommand: aCommand options: opts arguments: args [
         <category: 'private'>
         | block |
         block := self commands
-                    at: aCommand
-                    ifAbsent: [^WTCommandToken command: aCommand arguments: args].
-        ^block value: args
+            at: aCommand
+            ifAbsent: [^WTCommandToken command: aCommand
+                                       options: opts
+                                       arguments: args].
+        ^block value: opts value: args
     ]
 
     WTParser class >> parse: aString [
         <category: 'functionality'>
         ^WTParagraphBuilder on: (WTBlockBuilder on: (self content parse: aString))
     ]
+]
+
+
+Eval [
+    WTParser setupCommands
 ]

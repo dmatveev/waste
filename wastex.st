@@ -16,11 +16,11 @@ WTToken subclass: WTNewlineToken [
 ]
 
 WTToken subclass: WTCommandToken [
-    | command arguments |
+    | command options arguments |
     
-    WTCommandToken class >> command: aString arguments: anotherString [
+    WTCommandToken class >> command: aString options: aString2 arguments: aString3 [
         <category: 'instance creation'>
-        ^self new command: aString arguments: anotherString
+        ^self new command: aString options: aString2 arguments: aString3
     ]
 
     isWTCommandToken [
@@ -52,10 +52,11 @@ WTToken subclass: WTCommandToken [
         ^false
     ]
 
-    command: aString arguments: anotherString [
+    command: aString options: aString2 arguments: aString3 [
         <category: 'private'>
         command   := aString.
-        arguments := anotherString
+        options   := aString2.
+        arguments := aString3.
     ]
 ]
 

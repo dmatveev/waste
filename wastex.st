@@ -243,9 +243,18 @@ Object subclass: WTParser [
             => [:t | PreformattedNode text: t second]
     ]
 
+    WTParser class >> verb [
+        | end inside |
+        end := $! asParser.
+        inside := end not, #any asParser.
+        ^'\verb!' asParser, inside star flatten, end
+            => [:t | CodeNode text: t second]
+    ]
+
     WTParser class >> content [
         <category: 'parsers'>
-        ^(self verbatim / self command / self newline negate / self newline) star
+        ^(self verbatim / self verb / self command /
+          self newline negate / self newline) star
             => [:t || nodes |
                 nodes := WTContentOptimizer on: t.
                 nodes]

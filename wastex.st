@@ -126,6 +126,7 @@ Object subclass: WTBlockBuilder [
                 ifTrue: [(aToken ends: e)
                             ifTrue: [^self addToken:
                                          (WTParser nodeForCommand: e arguments
+                                                   options: nil
                                                    arguments: subnodes)]
                             ifFalse: [subnodes addFirst: e]]
                 ifFalse: [subnodes addFirst: e]]

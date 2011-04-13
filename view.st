@@ -1,3 +1,27 @@
+"Some kludges, again"
+
+Integer extend [
+    hexString [
+        <category: '*waste-convenience'>
+        | w |
+        w := WriteStream on: ''.
+        self printOn: w base: 16.
+        ^w contents
+    ]
+]
+
+String extend [
+    escaped [
+        <category: '*waste-convenience'>
+        ^self inject: '' into:
+        [:acc :each || character |
+        character := (' <>#%{}|\^[]`;/?:@=$&' includes: each)
+            ifTrue: ['%', each asInteger hexString]
+            ifFalse: [each asString].
+        acc, character].
+    ]
+]
+
 Object subclass: MarkdownRenderer [
     | text html parser |
 
@@ -119,14 +143,14 @@ ContentEntityRenderer subclass: BlogPostRenderer [
 
                 "TODO: introduce a Reusable tag component"
                 html anchor
-                    url: view section alias asString, '?tag=', firstTag;
+                    url: view section alias asString, '?tag=', firstTag escaped;
                     with: [html text: firstTag].
 
                 otherTags do:
                     [:each |
                     html text: ','; space.
                     html anchor
-                        url: view section alias asString, '?tag=', each;
+                        url: view section alias asString, '?tag=', each escaped;
                         with: [html text: each]]]
     ]
 
@@ -409,7 +433,7 @@ Seaside.WAComponent subclass: BlogCloud [
                              eachVal := each value.
                              
                              html anchor
-                                 url: view section alias asString, '?tag=', eachKey;
+                                 url: view section alias asString, '?tag=', eachKey escaped;
                                  with: [html text: eachKey].
                              html space; text: ('(', (eachVal asString), ')'); break]]
     ]

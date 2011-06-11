@@ -610,8 +610,19 @@ SectionView subclass: BlogView [
         tape show: postComponent.
         comment := postComponent tape call: (self session user newComment
                                                   asComponent addValidatedForm).
-        comment ifNotNil: [aPost comment: comment.
-                           section storage commit: aPost]
+        ((self spamPassed: comment) and: [comment notNil])
+            ifTrue: [aPost comment: comment.
+                     section storage commit: aPost]
+    ]
+
+    spamPassed: anEntry [
+        | noSpam |
+
+        self session user isTrusted ifTrue: [^true].
+
+        noSpam := NoSpam new: anEntry.
+        noSpam := self call: (noSpam asComponent addValidatedForm).
+        ^noSpam isPassed
     ]
 
     replyOn: aComment of: aPost [

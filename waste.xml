@@ -10,6 +10,7 @@
   <filein>model.st</filein>
   <filein>accounts.st</filein>
   <filein>descriptions.st</filein>
+  <filein>nospam.st</filein>
   <filein>view.st</filein>
   <filein>stuff.st</filein>
   <filein>session.st</filein>
@@ -22,6 +23,7 @@
   <file>model.st</file>
   <file>accounts.st</file>
   <file>descriptions.st</file>
+  <file>nospam.st</file>
   <file>view.st</file>
   <file>stuff.st</file>
   <file>session.st</file>

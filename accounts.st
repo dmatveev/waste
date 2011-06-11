@@ -52,6 +52,10 @@ Object subclass: WasteAccount [
         ^auth
     ]
 
+    isTrusted [
+        ^false
+    ]
+
     permissions: anArray [
         permissions := anArray
     ]
@@ -82,6 +86,10 @@ WasteAccount subclass: OwnerAccount [
 
     newComment [
         ^AuthorComment author: self
+    ]
+
+    isTrusted [
+        ^true
     ]
 ]
 
